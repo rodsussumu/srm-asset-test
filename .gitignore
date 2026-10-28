@@ -1,0 +1,24 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+
+# Java / Maven
+target/
+*.class
+
+# Angular / Node
+node_modules/
+dist/
+.angular/
+coverage/
+test-results.xml
+
+# Editors and system files
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
+# Local logs
+*.log
