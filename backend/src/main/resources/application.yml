@@ -8,11 +8,11 @@ spring:
     name: srm-credit-engine
   datasource:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/srm}
-    username: ${DATABASE_USER:srm}
+    username: ${DATABASE_USER:srm_app}
     password: ${DATABASE_PASSWORD}
   flyway:
-    user: ${MIGRATION_USER:${DATABASE_USER:srm}}
-    password: ${MIGRATION_PASSWORD:${DATABASE_PASSWORD}}
+    user: ${MIGRATION_USER}
+    password: ${MIGRATION_PASSWORD}
     locations: classpath:db/migration
   jpa:
     open-in-view: false

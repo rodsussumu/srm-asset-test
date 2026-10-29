@@ -45,3 +45,15 @@ A simulação captura um único instante para prazo e câmbio, é read-only e n�
 O Compose acrescenta somente o mock em Python stdlib, sem acoplá-lo à inicialização da API. A vigência é fixada ao iniciar, com sincronização explícita; não há alegação de dados de mercado. A credencial do banco ainda será segregada e impedida de alterar histórico no bloco 4. Logs de tentativas e contador existem agora; o formato JSON e as métricas financeiras do produto permanecem no bloco 7.
 
 Validação atual: 126 testes, 96,68% linhas/86,36% branches; limites JaCoCo preservados. A suíte HTTP prova as duas tentativas e término abaixo de 3 segundos nos cenários locais de timeout, sem inferir capacidade de produção. [Detalhes](docs/quality.md).
+
+## Liquidação e credenciais — bloco 4
+
+A fachada SettlementService não é transacional; ela chama SettlementTransactionService separado, com REQUIRES_NEW/READ COMMITTED. O proxy efetiva o commit antes de retornar à fachada e ao controller. Um sucesso HTTP não pode preceder o commit real. JPA faz a transição de status/version com DynamicUpdate/flush e JDBC grava snapshots/idempotência na mesma conexão transacional.
+
+A chave UUID é escopada por ator/rota e associada a SHA-256 do pedido normalizado. Reserva, resultado e auditoria estão na mesma transação. Replay recupera bytes/status/Location antes de recálculo. O lock_timeout local limita a espera a 3 segundos e SQLSTATE 55P03 vira REQUEST_IN_PROGRESS fora da transação abortada. Uma constraint diferida rejeita commit de reserva incompleta. Sucessos permanecem sem expiração nesta entrega.
+
+Liquidações e câmbio não têm UPDATE/DELETE/TRUNCATE pelo runtime, que não é dono das tabelas. O bootstrap cria login separado com papel NOLOGIN srm_runtime; Flyway usa o dono do esquema. A aplicação ainda recebe a credencial de migração ao iniciar: a separação de conexões não protege contra comprometimento completo do processo. Executar migrations em job independente é evolução operacional explícita.
+
+O teste financeiro usa login real srm_app e duas transações lendo a mesma versão sob barreira; espera um commit, um conflito, uma auditoria e um incremento. Falhas antes/depois do INSERT, no commit diferido e após commit na resposta verificam rollback e recuperação. Os mecanismos de coordenação/injeção permanecem exclusivamente no harness de testes. Não há hooks no código de produção.
+
+O diagrama acompanha as constraints: settlement_id da idempotência é FK sem UNIQUE, portanto não se promete relação 1:1 no banco. O fluxo normal cria um resultado por intenção; não foi adicionada migration apenas para acomodar um diagrama. O extrato e a instrumentação de métricas pós-commit continuam nos blocos 5/7; este bloco registra o evento de confirmação após commit, sem alegar métrica financeira já disponível.

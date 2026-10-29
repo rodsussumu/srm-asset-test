@@ -18,3 +18,9 @@ Angular separará apresentação, serviços de API e estado local por fluxo. Din
 A aquisição confirmará recebível, snapshot financeiro e resposta idempotente na mesma transação. Câmbio externo será sincronizado separadamente; a liquidação consultará cotação persistida válida. O extrato usará SQL parametrizado e snapshot consistente por resposta.
 
 O [ER do cadastro](er.md) reflete a migration V1; será ampliado com as novas tabelas. O C4 final será adicionado e confrontado com a implementação no bloco 7. O [desenho OpenSpec](../openspec/changes/build-srm-credit-engine/design.md) contém os modelos iniciais.
+
+## Liquidação implementada
+
+SettlementController delega a SettlementService, que valida a intenção e chama o proxy de SettlementTransactionService. Esse service abre uma transação nova para ler/controlar versão, reservar a chave, gravar auditoria e completar a resposta. JDBC e JPA compartilham a transação; a fachada só recebe o resultado após commit. O replay usa o JSON textual persistido para preservar bytes e Location. Detalhes em [liquidação](settlements.md).
+
+O login de negócio e o de migration são distintos; o [bootstrap e as permissões](database.md) acompanham as migrations. O [ER](er.md) agora cobre V1–V4. Controllers anteriores e o novo fluxo documentam erros como Problem Details; a consulta individual da liquidação declara a resposta 200 com SettlementResponse.

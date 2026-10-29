@@ -19,6 +19,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity
+@org.hibernate.annotations.DynamicUpdate
 @Table(name = "receivables")
 public class Receivable {
   @Id
@@ -106,6 +107,14 @@ public class Receivable {
 
   public ReceivableStatus getStatus() {
     return status;
+  }
+
+  public void markSettled() {
+    if (status != ReceivableStatus.AVAILABLE) {
+      throw new com.srm.credit.exception.SettlementConflictException(
+          com.srm.credit.exception.SettlementConflictException.Code.RECEIVABLE_ALREADY_SETTLED);
+    }
+    status = ReceivableStatus.SETTLED;
   }
 
   public Long getVersion() {

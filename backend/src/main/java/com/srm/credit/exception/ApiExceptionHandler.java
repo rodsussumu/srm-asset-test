@@ -38,6 +38,27 @@ public class ApiExceptionHandler {
     return validation(Map.of(exception.field(), exception.getMessage()), request);
   }
 
+  @ExceptionHandler(SettlementConflictException.class)
+  ResponseEntity<ProblemDetail> settlementConflict(
+      SettlementConflictException exception, HttpServletRequest request) {
+    String detail =
+        switch (exception.code()) {
+          case PRICE_CHANGED -> "Preço ou cotação alterados; simule e confirme novamente.";
+          case IDEMPOTENCY_KEY_REUSED -> "Chave já confirmada para outro pedido.";
+          case REQUEST_IN_PROGRESS ->
+              "Outra requisição com a mesma chave está em andamento; tente novamente.";
+          case RECEIVABLE_ALREADY_SETTLED ->
+              "Recebível já liquidado ou confirmado por outra operação.";
+        };
+    var problem = errors.problem(HttpStatus.CONFLICT, exception.code().name(), detail, request);
+    var builder =
+        ResponseEntity.status(HttpStatus.CONFLICT).contentType(MediaType.APPLICATION_PROBLEM_JSON);
+    if (exception.code() == SettlementConflictException.Code.REQUEST_IN_PROGRESS) {
+      builder.header("Retry-After", "1");
+    }
+    return builder.body(problem);
+  }
+
   @ExceptionHandler(FxRateConflictException.class)
   ResponseEntity<ProblemDetail> fxConflict(HttpServletRequest request) {
     return response(

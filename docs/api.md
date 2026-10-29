@@ -1,4 +1,4 @@
-# API implementada nos blocos 2 e 3
+# API implementada nos blocos 2 a 4
 
 Base: `/api/v1`. As rotas abaixo exigem autenticação. O frontend ainda é o esqueleto; o painel de operação será implementado no bloco 6.
 
@@ -16,6 +16,8 @@ Base: `/api/v1`. As rotas abaixo exigem autenticação. O frontend ainda é o es
 | GET `/fx-rates/current` | Última cotação elegível até agora; 503 se ausente/expirada. |
 | POST `/fx-rates/sync` | ADMIN sincroniza o mock; 201/Location se criada, 200 se já existe com mesmo valor. |
 | POST `/pricing/simulations` | Simulação indicativa sem persistência financeira; 200 ou 503 em USD sem câmbio válido. |
+| POST `/settlements` | Confirma com recálculo e Idempotency-Key UUID; 201/Location inclusive no replay exato. |
+| GET `/settlements/{id}` | Snapshot original de auditoria; 200 ou 404. |
 
 Listagens retornam `{items, page, size, total}`. Tamanho entre 1 e 100, padrão 20. Cedentes e recebíveis usam createdAt/id decrescentes; câmbio usa effectiveAt/id decrescentes. Página sem registros retorna 200 e lista vazia.
 
@@ -69,7 +71,7 @@ Não exige cedente ou título persistidos. Use vencimento elegível na data atua
 
 A resposta inclui `indicative: true`, faceValue/faceCurrency, dueDate/type, presentValueBrl (`"92859.94"`), discountBrl (`"7140.06"`), paymentAmount (`"17094.67"`), paymentCurrency, months (3), baseRate (`"0.0100"`), spread (`"0.0150"`), operationAt, operationDate, businessTimezone, termConvention, roundingMode, policyVersion e fxRate com o snapshot completo. Valores/taxas são strings; em BRL fxRate é null. `operationAt` é capturado uma vez para prazo e câmbio. A taxa base configurável `PRICING_BASE_RATE` tem padrão 0.0100 e é devolvida no resultado. Não se aceita taxa, prazo ou cotação enviados pelo cliente para substituir o cálculo do servidor.
 
-BRL não consulta câmbio; USD só consulta o banco, sem HTTP externo. Falta/expiração gera 503 `FX_RATE_UNAVAILABLE`. A simulação não insere nem altera cedentes, recebíveis ou cotações; liquidações ainda não existem nesta etapa. O preço é indicativo, sem reserva ou confirmação financeira.
+BRL não consulta câmbio; USD só consulta o banco, sem HTTP externo. Falta/expiração gera 503 `FX_RATE_UNAVAILABLE`. A simulação não insere nem altera cedentes, recebíveis, cotações ou liquidações. O preço é indicativo, sem reserva ou confirmação financeira; a confirmação usa o endpoint de liquidação separado.
 
 ## OpenAPI e verificação
 
@@ -83,4 +85,12 @@ No diretório backend, com Java 21 e Docker ativos:
 
 `ReceivablesIntegrationTest` exercita HTTP via MockMvc com PostgreSQL descartável real: cadastro, consulta, paginação, precisão, validação de entrada, autenticação, CSRF, erros e OpenAPI. Não usa H2 e não altera o banco do Compose.
 
-`FxIntegrationTest` acrescenta histórico/constraints, seleção temporal, controle ADMIN, sincronização repetida e simulação de C1–C3 sem gravações. `FxProviderClientTest` afere retries e timeouts com HTTP real. Não há endpoints de liquidação ou extrato de liquidações nesta etapa.
+`FxIntegrationTest` acrescenta histórico/constraints, seleção temporal, controle ADMIN, sincronização repetida e simulação de C1–C3 sem gravações. `FxProviderClientTest` afere retries e timeouts com HTTP real. `SettlementSchemaTest` e `SettlementIntegrationTest` verificam permissões reais, confirmação de C1–C3, replay, conflitos, concorrência com barreira, rollback e perda de resposta após commit. O extrato de liquidações pertence ao bloco 5.
+
+## Liquidação
+
+`POST /settlements` exige Idempotency-Key UUID e corpo `{receivableId, currency, expectedPaymentAmount, expectedFxRateId?}`. Currency deve coincidir com o cadastro; expectedPaymentAmount é string não negativa com até duas casas. ExpectedFxRateId é obrigatório em USD e ausente em BRL. O operador vem da autenticação. Sucesso 201/Location somente após commit; o corpo é o snapshot auditável, com valores, parâmetros, operador, versão, correlação e cotação original.
+
+Retry com mesma chave e conteúdo normalizado devolve exatamente 201/corpo/Location originais, antes de consultar recebível/câmbio. Mesma chave com outro conteúdo gera IDEMPOTENCY_KEY_REUSED. Preço/UUID de cotação diferentes geram PRICE_CHANGED, exigindo nova simulação e confirmação. Título já liquidado ou disputa perdida gera RECEIVABLE_ALREADY_SETTLED. Espera pela mesma chave é limitada a 3 segundos; REQUEST_IN_PROGRESS retorna Retry-After: 1. Todos esses conflitos usam 409. Falha inesperada de persistência ou commit retorna 500 e desfaz todas as gravações. Em USD, falta de cotação local válida retorna 503.
+
+`GET /settlements/{id}` não recalcula e preserva o histórico após novas cotações ou alteração do nome do cedente. Não há endpoints de alteração/exclusão de auditoria. Exemplos, retenção e semântica completa em [liquidação e retry](settlements.md); configuração de banco em [credenciais](database.md).
