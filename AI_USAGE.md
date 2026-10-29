@@ -17,7 +17,7 @@ A stack, a arquitetura MVC, a sequência de trabalho e o fluxo de branches/PRs f
 - Resultados reais de golden cases, concorrência, rollback, retry e verificações da interface.
 - Decisões aceitas, corrigidas ou rejeitadas pelo autor ao longo das etapas.
 
-Os relatos abaixo registram o estado de cada etapa. Atualmente há testes backend/Angular, smoke final e aferição HTTP locais; defesa ao vivo, aceite comercial e execução remota da CI atual permanecem sem evidência.
+Os relatos abaixo são históricos: pendências descritas em uma etapa se referem àquele momento. O estado consolidado inclui testes backend/Angular, smoke e aferição HTTP locais, além da CI remota da PR #10 aprovada com três artefatos publicados. Defesa ao vivo e aceite comercial permanecem sem evidência. [CI verificada](docs/ci.md).
 
 ## Estrutura inicial — 28/10/2026
 
@@ -114,3 +114,7 @@ A repetição usou banco limpo, mesmas cotas/fixture, prevenção temporária de
 Houve outro erro real da IA no observador: json.loads aplicado diretamente ao stream descartava a primeira linha com controles ANSI, omitindo backend. A inspeção da cobertura de nomes nas amostras detectou a lacuna. O parser agora remove esses controles, registra erros e verifica quatro serviços; um replay offline de payloads reais conferiu a correção. O relatório não inventa amostras contínuas de backend: usa os contadores cgroup de todos os serviços e identifica a limitação. Não houve terceira carga para apagar a evidência.
 
 Spec central, cenário operacional, matriz (agora 32 requisitos/60 cenários) e roteiro foram alinhados. Arquivos brutos grandes permanecem ignorados; evidências selecionadas são gzip verificáveis. CI remota e defesa humana continuam sem evidência nesta etapa.
+
+## Conferência da CI e manutenção — 29/10/2026
+
+A execução remota da PR #10 foi inspecionada no GitHub: backend e frontend aprovados, com backend-test-results, backend-coverage e frontend-test-results publicados. O download dos arquivos não foi verificado. Os avisos de runtime Node 20 e setup-java v4 motivaram a atualização das Actions; o aviso de migração de ubuntu-latest motivou fixar Ubuntu 24.04. Os testes Angular/Vitest já rodavam na CI; a etapa recebeu nome explícito. A execução anterior comprova o workflow anterior, não a versão modificada localmente. [Evidência e fontes](docs/ci.md).
