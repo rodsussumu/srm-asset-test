@@ -57,3 +57,13 @@ Liquidações e câmbio não têm UPDATE/DELETE/TRUNCATE pelo runtime, que não 
 O teste financeiro usa login real srm_app e duas transações lendo a mesma versão sob barreira; espera um commit, um conflito, uma auditoria e um incremento. Falhas antes/depois do INSERT, no commit diferido e após commit na resposta verificam rollback e recuperação. Os mecanismos de coordenação/injeção permanecem exclusivamente no harness de testes. Não há hooks no código de produção.
 
 O diagrama acompanha as constraints: settlement_id da idempotência é FK sem UNIQUE, portanto não se promete relação 1:1 no banco. O fluxo normal cria um resultado por intenção; não foi adicionada migration apenas para acomodar um diagrama. O extrato e a instrumentação de métricas pós-commit continuam nos blocos 5/7; este bloco registra o evento de confirmação após commit, sem alegar métrica financeira já disponível.
+
+## Extrato e consultas SQL — bloco 5
+
+O extrato usa três consultas parametrizadas em uma transação própria read-only REPEATABLE READ: página, contagem e totais por moeda. Isso evita misturar snapshots quando outra liquidação confirma durante a resposta. REQUIRES_NEW garante a fronteira mesmo se o service for chamado a partir de outro contexto transacional. Não se promete o mesmo snapshot entre requisições de páginas distintas.
+
+Filtros opcionais são fragmentos fixos e valores são vinculados por parâmetros. Ordenação é fixa por instante/UUID decrescentes; offset usa long. Limites ISO com nanossegundos são elevados à grade de microssegundos do PostgreSQL nas comparações, preservando o intervalo semiaberto contra os instantes armazenados. Totais não recalculam preço nem misturam BRL/USD e podem exceder a capacidade de um pagamento individual.
+
+V5 adiciona três índices iniciais. O teste de planos executa as mesmas strings do repository com papel restrito em PostgreSQL descartável, após carga idempotente de 10000 recebíveis/5000 liquidações e VACUUM ANALYZE. Mantivemos os índices sem forçar o planejador ou criar um índice combinado sem evidência. Contagens e totais amplos ainda percorrem todo o filtro; offset alto pode custar mais. O fixture SQL não executa a API de confirmação nem resultados idempotentes e não comprova throughput financeiro ou p95 HTTP.
+
+Resultado atual: 190 testes, cobertura geral 96,78% linhas/86,97% branches, preservando todos os mínimos. A CI inclui o relatório de planos nos artefatos de testes. A execução remota desta branch, o painel e a aferição HTTP permanecem pendentes. [Planos e método](docs/statements.md).

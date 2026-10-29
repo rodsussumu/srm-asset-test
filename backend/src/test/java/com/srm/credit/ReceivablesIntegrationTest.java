@@ -110,7 +110,7 @@ class ReceivablesIntegrationTest {
 
   @Test
   void migratesAnEmptyPostgresAndPersistsExactMoneyAndInitialVersion() {
-    assertThat(flyway.info().applied()).hasSize(4);
+    assertThat(flyway.info().applied()).hasSize(5);
     var assignor = assignors.saveAndFlush(new Assignor("Cedente de teste", Instant.now()));
     var receivable =
         receivables.saveAndFlush(

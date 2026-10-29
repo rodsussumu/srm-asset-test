@@ -39,9 +39,9 @@ Executar por etapas, com uma branch por funcionalidade e pull request para main.
 
 ## 5. Extrato analítico
 
-- [ ] 5.1 Implementar consulta SQL parametrizada com filtros, período semiaberto de até 366 dias, ordenação determinística e paginação até 100; verificar combinações, limites, empates, página vazia e erros de validação em PostgreSQL.
-- [ ] 5.2 Implementar contagem e totais por moeda para todo o filtro em snapshot consistente por resposta; verificar duas moedas, valores originais, independência da página e consistência perante inserção concorrente.
-- [ ] 5.3 Adicionar índices iniciais e massa reproduzível de 10000 recebíveis/5000 liquidações; registrar EXPLAIN ANALYZE das consultas principais e documentar limites de paginação no OpenAPI/README.
+- [x] 5.1 Implementar consulta SQL parametrizada com filtros, período semiaberto de até 366 dias, ordenação determinística e paginação até 100; verificar combinações, limites, empates, página vazia e erros de validação em PostgreSQL.
+- [x] 5.2 Implementar contagem e totais por moeda para todo o filtro em snapshot consistente por resposta; verificar duas moedas, valores originais, independência da página e consistência perante inserção concorrente.
+- [x] 5.3 Adicionar índices iniciais e massa reproduzível de 10000 recebíveis/5000 liquidações; registrar EXPLAIN ANALYZE das consultas principais e documentar limites de paginação no OpenAPI/README.
 
 ## 6. Autenticação e painel Angular
 

@@ -2,7 +2,7 @@
 
 ## Context
 
-O projeto possui estrutura inicial e blocos 2 a 4: cadastro/consulta MVC, motor decimal, prazo, câmbio/simulação, liquidação transacional e idempotente, auditoria e credenciais restritas. As migrations V1–V4 preservam snapshots e protegem o histórico. Os testes PostgreSQL verificam disputa da mesma versão, rollback e resposta perdida após commit. A task 2.6 mantém testes/cobertura/artefatos na CI. Extrato e frontend funcional ainda serão implementados; a suíte Angular acompanhará o painel. Motivação e contratos estão na proposta e nas seis specs; premissas foram definidas no SPEC antes do código.
+O projeto possui estrutura inicial e blocos 2 a 5: cadastro MVC, motor/câmbio/simulação, liquidação ACID/idempotente, auditoria e extrato SQL parametrizado. V1–V5 mantêm precisão, permissões e índices. A validação local inclui 190 testes, snapshot do extrato perante inserção concorrente e planos SQL na massa sintética de 10000/5000 registros. A task 2.6 mantém testes/cobertura/artefatos na CI. Frontend funcional e sua suíte vêm no bloco 6; a aferição HTTP vem no bloco 8. Motivação e contratos estão na proposta e nas seis specs; premissas foram definidas no SPEC antes do código.
 
 ## Goals / Non-Goals
 

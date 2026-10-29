@@ -99,3 +99,17 @@ O teste OpenAPI verifica Idempotency-Key obrigatório, snapshot 201, consulta in
 Compose foi validado com .env.example e inclui PostgreSQL, db-bootstrap e mock; a API continua no host. O bootstrap no Compose deve ser executado antes da API, sem apagar volumes existentes. A implementação usa credenciais distintas no atendimento e nas migrations, mas o processo backend ainda recebe ambas ao iniciar. A segregação não é isolamento contra comprometimento completo do processo.
 
 Não houve alteração do .env real, criação/reinício do Compose habitual ou remoção de volume de dados. Os PostgreSQL de teste são descartáveis e encerrados pelo Testcontainers. CI já executa as novas suítes pelo mesmo clean verify; execução remota desta branch, extrato, painel, métricas de confirmações e smoke integrado permanecem nos blocos correspondentes.
+
+## Validação atual — bloco 5, 29/10/2026
+
+`./mvnw -B -ntp spotless:apply clean verify` passou com **190 testes**, zero falhas/erros/skips, Spotless e todos os checks JaCoCo. São 164 casos anteriores, 25 de StatementIntegrationTest e 1 de StatementQueryPlanTest. Cobertura atual: **842/870 linhas (96,78%)** e **207/238 branches (86,97%)**, sem alterar os mínimos gerais/financeiros ou excluir produção.
+
+O extrato é exercitado com login real srm_app: período semiaberto, filtros combinados, 366 dias, paginação/limites, 45 instantes empatados, página vazia, ordem UTC/UUID e limites submicrossegundo. Os testes preservam snapshots após mudança de nome/cotação e somam decimais exatos, inclusive totais maiores que um pagamento individual. BRL e USD nunca são somados em uma moeda artificial.
+
+Um teste com latches pausa a leitura após a página, confirma outra inserção por conexão independente e exige a contagem/totais da visão original. Também verifica transaction_isolation=repeatable read e transaction_read_only=on. A requisição seguinte vê a nova liquidação. Não há sleeps ou hooks no código de produção para coordenar esse cenário.
+
+O teste de planos aplica V1–V5 em PostgreSQL 17.11 descartável, executa duas vezes o seed sem duplicar e verifica 10000 recebíveis, 5000 liquidações e 2500 pagamentos USD. O fixture tem 10 cedentes, datas/UUIDs fixos e cotações históricas válidas na operação. Executa as consultas reais do repository com statement_reader/srm_runtime, após VACUUM ANALYZE, e gera EXPLAIN (ANALYZE, BUFFERS) para página/contagem/totais em quatro combinações de filtros.
+
+O [relatório desta execução](statement-query-plans.txt) foi copiado de target e os tempos extraídos estão em [extrato](statements.md). A CI publica esse relatório junto de Surefire e mantém JaCoCo, por 14 dias. Não foi forçado o uso de índices; o plano depende dos dados e pode escolher varredura sequencial em agregações amplas. Tempo SQL isolado com dados aquecidos não comprova p95 HTTP ou throughput de confirmação.
+
+O seed foi executado somente nos bancos descartáveis dos testes, não no Compose habitual. Configuração YAML/Compose, OpenSpec e links foram conferidos no fechamento da etapa. Não houve teste funcional Angular, aferição HTTP ou execução remota desta branch.

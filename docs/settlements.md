@@ -49,7 +49,7 @@ O corpo do replay mantém o correlationId da confirmação original para preserv
 | 503 FX_RATE_UNAVAILABLE | USD sem cotação local vigente com até 24 horas. |
 | 500 INTERNAL_ERROR | Falha inesperada de persistência/commit; detalhe seguro e rollback. |
 
-Falha externa não impede BRL ou USD com cotação local válida. A proteção pelo usuário real do banco está em [credenciais e histórico](database.md). O extrato filtrado/paginado pertence ao bloco 5; neste bloco há somente consulta individual. Não há garantia de execução única fora deste banco ou de transferência bancária.
+Falha externa não impede BRL ou USD com cotação local válida. A proteção pelo usuário real do banco está em [credenciais e histórico](database.md). O extrato filtrado/paginado está implementado em GET /api/v1/settlements; a consulta individual permanece para leitura do snapshot por UUID. Veja [extrato](statements.md). Não há garantia de execução única fora deste banco ou de transferência bancária.
 
 ## Verificação
 
