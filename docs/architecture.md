@@ -1,6 +1,6 @@
-# Arquitetura planejada
+# Arquitetura MVC
 
-Monólito Java/Spring MVC, SPA Angular e PostgreSQL. As funcionalidades criarão seus pacotes conforme a necessidade; a estrutura inicial não deve antecipar camadas vazias.
+Monólito Java/Spring MVC, SPA Angular e PostgreSQL. O bloco 2 cria as camadas necessárias ao cadastro e ao motor. As demais funcionalidades seguirão as mesmas responsabilidades, sem antecipar camadas vazias.
 
 | Camada | Responsabilidade |
 |---|---|
@@ -17,4 +17,4 @@ Angular separará apresentação, serviços de API e estado local por fluxo. Din
 
 A aquisição confirmará recebível, snapshot financeiro e resposta idempotente na mesma transação. Câmbio externo será sincronizado separadamente; a liquidação consultará cotação persistida válida. O extrato usará SQL parametrizado e snapshot consistente por resposta.
 
-Os diagramas ER e C4 finais serão adicionados e confrontados com a implementação no bloco 7. O [desenho OpenSpec](../openspec/changes/build-srm-credit-engine/design.md) contém os modelos iniciais.
+O [ER do cadastro](er.md) reflete a migration V1; será ampliado com as novas tabelas. O C4 final será adicionado e confrontado com a implementação no bloco 7. O [desenho OpenSpec](../openspec/changes/build-srm-credit-engine/design.md) contém os modelos iniciais.

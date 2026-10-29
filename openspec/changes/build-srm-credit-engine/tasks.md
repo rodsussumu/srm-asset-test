@@ -1,6 +1,6 @@
 # Tasks
 
-Executar por etapas, com uma branch por funcionalidade e pull request para main. Marcar cada item somente após sua implementação e validação neste repositório. Seguir MVC com controller → service → repository, model, dto, config e exception, conforme `docs/architecture.md`. Criar os pacotes somente quando houver implementação correspondente.
+Executar por etapas, com uma branch por funcionalidade e pull request para main. Por orientação do usuário, o bloco 2 inclui a antecipação dos testes/cobertura do backend na CI (2.6); a suíte do painel será incorporada quando houver funcionalidades Angular. Marcar cada item somente após sua implementação e validação neste repositório. Seguir MVC com controller → service → repository, model, dto, config e exception, conforme `docs/architecture.md`. Criar os pacotes somente quando houver implementação correspondente.
 
 ## 1. Premissas, documentação inicial e base do projeto
 
@@ -12,11 +12,13 @@ Executar por etapas, com uma branch por funcionalidade e pull request para main.
 
 ## 2. Motor financeiro e cadastro de recebíveis
 
-- [ ] 2.1 Implementar strategies DUPLICATA/CHEQUE em model.strategy e motor decimal no model com política versionada; verificar C1, C2 e C3 em teste automatizado com comparação ao centavo, incluindo deságio e moedas.
-- [ ] 2.2 Implementar prazo mensal, Clock injetável e elegibilidade; verificar dias 0, 1, 30, 31, 1080 e 1081, virada de data em São Paulo, prazo zero apenas no motor puro, limites de face e empates half-even.
-- [ ] 2.3 Criar migrations de cedentes/recebíveis, constraints e versão otimista; verificar aplicação em PostgreSQL limpo com teste de integração e inserir o ER inicial em `docs/`.
-- [ ] 2.4 Implementar cadastro e consulta de cedentes/recebíveis separando controller, service, repository, model e dto, com validação e strings decimais; verificar 201/Location, 400 para campos inválidos e 404 para consulta inexistente; documentar endpoints no OpenAPI.
-- [ ] 2.5 Implementar exception handler e correlação comuns; verificar respostas semânticas sem stack trace, SQL ou segredo, com erros de campo e correlationId.
+- [x] 2.1 Implementar strategies DUPLICATA/CHEQUE em model.strategy e motor decimal no model com política versionada; verificar C1, C2 e C3 em teste automatizado com comparação ao centavo, incluindo deságio e moedas.
+- [x] 2.2 Implementar prazo mensal, Clock injetável e elegibilidade; verificar dias 0, 1, 30, 31, 1080 e 1081, virada de data em São Paulo, prazo zero apenas no motor puro, limites de face e empates half-even.
+- [x] 2.3 Criar migrations de cedentes/recebíveis, constraints e versão otimista; verificar aplicação em PostgreSQL limpo com teste de integração e inserir o ER inicial em `docs/`.
+- [x] 2.4 Implementar cadastro e consulta de cedentes/recebíveis separando controller, service, repository, model e dto, com validação e strings decimais; verificar 201/Location, 400 para campos inválidos e 404 para consulta inexistente; documentar endpoints no OpenAPI.
+- [x] 2.5 Implementar exception handler e correlação comuns; verificar respostas semânticas sem stack trace, SQL ou segredo, com erros de campo e correlationId.
+
+- [x] 2.6 Antecipar testes do backend na CI: executar golden cases, unitários, migrations e integrações PostgreSQL reais; exigir cobertura JaCoCo geral 80%/70% e financeira 95%/90%, publicar resultados/cobertura por 14 dias e comprovar reprovação abaixo dos limites.
 
 ## 3. Câmbio e simulação
 
