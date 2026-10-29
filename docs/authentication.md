@@ -4,7 +4,7 @@ O backend usa Spring Security com sessão, autenticação por formulário e senh
 
 As senhas vêm do ambiente, são transformadas em hashes no início da aplicação e não são devolvidas pela API. São duas contas em memória, sem cadastro de usuários ou federação. Alterar a configuração exige reinício. Nomes são identidades de auditoria e do escopo idempotente: mantenha-os estáveis. O limite desse modelo demonstrativo inclui ausência de MFA, governança de usuários, sessões distribuídas e limitação de tentativas de login.
 
-Use o Angular em localhost:4200 com o proxy de desenvolvimento (nginx no Compose previsto para o bloco 7). O navegador acessa a API pela mesma origem; não há CORS irrestrito. O cookie JSESSIONID tem HttpOnly e SameSite=Lax, com timeout de sessão de 30 minutos. `COOKIE_SECURE=false` serve apenas HTTP local; em HTTPS configure `COOKIE_SECURE=true`. A sessão reside na memória do backend e não sobrevive ao reinício.
+Use o Angular em localhost:4200 com o proxy de desenvolvimento ou com nginx no Compose. O navegador acessa a API pela mesma origem; não há CORS irrestrito. O cookie JSESSIONID tem HttpOnly e SameSite=Lax, com timeout de sessão de 30 minutos. `COOKIE_SECURE=false` serve apenas HTTP local; em HTTPS configure `COOKIE_SECURE=true`. A sessão reside na memória do backend e não sobrevive ao reinício.
 
 ## Protocolo HTTP
 

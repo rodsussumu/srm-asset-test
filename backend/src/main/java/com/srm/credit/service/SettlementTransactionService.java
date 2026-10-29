@@ -2,6 +2,7 @@ package com.srm.credit.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.srm.credit.config.BusinessMetrics;
 import com.srm.credit.dto.SettlementResponse;
 import com.srm.credit.exception.InvalidInputException;
 import com.srm.credit.exception.ResourceNotFoundException;
@@ -27,6 +28,7 @@ public class SettlementTransactionService {
   private final SettlementRepository settlements;
   private final FxRateService rates;
   private final PricingEngine engine;
+  private final BusinessMetrics metrics;
   private final MonthlyTermPolicy policy;
   private final Clock clock;
   private final ObjectMapper mapper;
@@ -39,12 +41,14 @@ public class SettlementTransactionService {
       PricingEngine engine,
       MonthlyTermPolicy policy,
       Clock clock,
-      ObjectMapper mapper) {
+      ObjectMapper mapper,
+      BusinessMetrics metrics) {
     this.idempotency = idempotency;
     this.receivables = receivables;
     this.settlements = settlements;
     this.rates = rates;
     this.engine = engine;
+    this.metrics = metrics;
     this.policy = policy;
     this.clock = clock;
     this.mapper = mapper;
@@ -75,12 +79,15 @@ public class SettlementTransactionService {
     var term = policy.evaluate(receivable.getDueDate(), operationAt);
     var fx = intent.currency() == PaymentCurrency.USD ? rates.selectAt(operationAt) : null;
     var price =
-        engine.calculate(
-            receivable.getFaceValue(),
-            receivable.getType(),
-            term.months(),
+        metrics.price(
             intent.currency(),
-            fx == null ? null : fx.getRate());
+            () ->
+                engine.calculate(
+                    receivable.getFaceValue(),
+                    receivable.getType(),
+                    term.months(),
+                    intent.currency(),
+                    fx == null ? null : fx.getRate()));
     if (price.paymentAmount().compareTo(new BigDecimal(intent.expectedPaymentAmount())) != 0
         || (fx != null && !fx.getId().equals(intent.expectedFxRateId()))) {
       throw new SettlementConflictException(Code.PRICE_CHANGED);

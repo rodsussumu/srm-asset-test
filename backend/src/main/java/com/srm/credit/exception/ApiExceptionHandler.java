@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,7 +23,6 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
-  private static final Logger LOG = LoggerFactory.getLogger(ApiExceptionHandler.class);
   private final ErrorResponses errors;
 
   public ApiExceptionHandler(ErrorResponses errors) {
@@ -189,9 +186,6 @@ public class ApiExceptionHandler {
 
   @ExceptionHandler(Exception.class)
   ResponseEntity<ProblemDetail> unexpected(Exception exception, HttpServletRequest request) {
-    LOG.error(
-        "event=request_failed code=INTERNAL_ERROR exception={}",
-        exception.getClass().getSimpleName());
     return response(
         HttpStatus.INTERNAL_SERVER_ERROR,
         "INTERNAL_ERROR",

@@ -1,5 +1,6 @@
 package com.srm.credit.service;
 
+import com.srm.credit.config.BusinessMetrics;
 import com.srm.credit.dto.CreateSettlementRequest;
 import com.srm.credit.exception.InvalidInputException;
 import com.srm.credit.exception.ResourceNotFoundException;
@@ -24,11 +25,15 @@ public class SettlementService {
   private static final Logger LOG = LoggerFactory.getLogger(SettlementService.class);
   private final SettlementTransactionService transaction;
   private final SettlementRepository repository;
+  private final BusinessMetrics metrics;
 
   public SettlementService(
-      SettlementTransactionService transaction, SettlementRepository repository) {
+      SettlementTransactionService transaction,
+      SettlementRepository repository,
+      BusinessMetrics metrics) {
     this.transaction = transaction;
     this.repository = repository;
+    this.metrics = metrics;
   }
 
   public StoredSettlementResponse confirm(
@@ -60,11 +65,14 @@ public class SettlementService {
     }
     // The transaction proxy has committed before returning here. Replays are not new confirmations.
     if (!result.replay()) {
-      LOG.info(
-          "event=settlement_confirmed actorId={} receivableId={} settlementId={} outcome=success",
-          actor,
-          intent.receivableId(),
-          result.settlementId());
+      metrics.confirmed(intent.currency());
+      LOG.atInfo()
+          .addKeyValue("event", "settlement_confirmed")
+          .addKeyValue("actorId", actor)
+          .addKeyValue("receivableId", intent.receivableId())
+          .addKeyValue("settlementId", result.settlementId())
+          .addKeyValue("outcome", "success")
+          .log("Liquidação confirmada após commit.");
     }
     return result;
   }

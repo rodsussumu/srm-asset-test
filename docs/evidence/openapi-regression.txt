@@ -1,0 +1,11 @@
+Extrato do log real de validação do bloco 3 (29/10/2026), antes da correção.
+Não é uma nova execução nem uma regressão no estado atual.
+Teste: FxIntegrationTest#publishesSimulationAndCurrencyContractsInOpenApi
+
+[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 6.559 s <<< FAILURE! -- in com.srm.credit.FxIntegrationTest
+java.lang.AssertionError: No value at JSON path "$.paths['/api/v1/fx-rates/current'].get.responses['200']"
+[ERROR]   FxIntegrationTest.publishesSimulationAndCurrencyContractsInOpenApi:429 No value at JSON path "$.paths['/api/v1/fx-rates/current'].get.responses['200']"
+[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0
+[INFO] BUILD FAILURE
+
+Correção: declarar explicitamente a resposta 200 de GET /api/v1/fx-rates/current; manter teste de contrato como regressão.

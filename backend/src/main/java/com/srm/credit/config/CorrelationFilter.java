@@ -15,6 +15,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class CorrelationFilter extends OncePerRequestFilter {
+  private static final org.slf4j.Logger LOG =
+      org.slf4j.LoggerFactory.getLogger(CorrelationFilter.class);
   public static final String HEADER = "X-Correlation-ID";
   public static final String ATTRIBUTE = "correlationId";
 
@@ -30,9 +32,17 @@ public class CorrelationFilter extends OncePerRequestFilter {
     request.setAttribute(ATTRIBUTE, id);
     response.setHeader(HEADER, id);
     MDC.put(ATTRIBUTE, id);
+    boolean completed = false;
     try {
       chain.doFilter(request, response);
+      completed = true;
     } finally {
+      LOG.atInfo()
+          .addKeyValue("event", "http_request")
+          .addKeyValue("method", request.getMethod())
+          .addKeyValue("status", response.getStatus())
+          .addKeyValue("outcome", completed && response.getStatus() < 400 ? "success" : "failure")
+          .log("Requisição processada.");
       MDC.remove(ATTRIBUTE);
     }
   }

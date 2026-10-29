@@ -1,0 +1,15 @@
+Execução local: 29/10/2026
+Projeto: srm-new-task7 (banco e portas descartáveis)
+PostgreSQL 55447; API 18087; nginx 14207; mock 18097
+Comando: python3 -u scripts/verify-compose.py --project srm-new-task7 --env-file /tmp/srm-new-task7.env --base-url http://127.0.0.1:14207
+
+PASS runtime SQL login: application connections, INSERT allowed and history UPDATE/DELETE denied
+PASS proxy, health, session cookies, login/CSRF, correlation and FX synchronization
+PASS provider stopped: C1/C3 simulation, settlement, three exact replays, counters and separate totals
+PASS database stopped: readiness 503 with no details, liveness 200
+PASS JSON events: UTC, correlation, outcome, audit identifiers and no probe secrets; exactly two confirmation events
+PASS all Compose operational checks; synthetic records remain in the disposable project
+
+Conferência adicional após remover log HTTP padrão do mock:
+PASS mock: rate 200 and unknown path 404
+Logs fx-mock: saída vazia após path com canário sintético.

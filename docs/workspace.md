@@ -1,6 +1,6 @@
 # Painel de operações
 
-O Angular oferece login/logout, cadastro de cedentes e recebíveis, simulação, confirmação e extrato em português. Rode `npm ci`, `npm start` no frontend e o backend em 8080; o proxy mantém as chamadas na mesma origem. A inclusão do nginx no Compose será feita no bloco 7. Configure as duas contas conforme [sessão e acesso](authentication.md).
+O Angular oferece login/logout, cadastro de cedentes e recebíveis, simulação, confirmação e extrato em português. Rode `npm ci`, `npm start` no frontend e o backend em 8080; o proxy mantém as chamadas na mesma origem. No Compose, nginx serve o bundle e encaminha a API pela mesma origem. Configure as duas contas conforme [sessão e acesso](authentication.md).
 
 ## Operação
 

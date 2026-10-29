@@ -14,6 +14,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ErrorResponses {
+  private static final org.slf4j.Logger LOG =
+      org.slf4j.LoggerFactory.getLogger(ErrorResponses.class);
   private final ObjectMapper mapper;
 
   public ErrorResponses(ObjectMapper mapper) {
@@ -27,6 +29,17 @@ public class ErrorResponses {
     problem.setProperty("code", code);
     Object id = request.getAttribute(CorrelationFilter.ATTRIBUTE);
     problem.setProperty("correlationId", id == null ? UUID.randomUUID().toString() : id.toString());
+    LOG.atLevel(
+            status.is5xxServerError() ? org.slf4j.event.Level.ERROR : org.slf4j.event.Level.WARN)
+        .addKeyValue(
+            "actorId",
+            request.getUserPrincipal() == null ? null : request.getUserPrincipal().getName())
+        .addKeyValue("receivableId", request.getAttribute("receivableId"))
+        .addKeyValue("event", "request_failed")
+        .addKeyValue("code", code)
+        .addKeyValue("status", status.value())
+        .addKeyValue("outcome", "failure")
+        .log("Requisição recusada.");
     return problem;
   }
 

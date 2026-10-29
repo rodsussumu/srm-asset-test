@@ -165,6 +165,7 @@ public class SettlementController {
           String key,
       Authentication authentication,
       HttpServletRequest request) {
+    request.setAttribute("receivableId", body.receivableId());
     var result =
         service.confirm(
             authentication.getName(),

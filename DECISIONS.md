@@ -6,7 +6,7 @@ Java/Spring Boot, Angular e PostgreSQL são as escolhas do projeto. O backend se
 
 Adotar monólito: uma aquisição exige atomicidade entre estado, auditoria e idempotência. Serviços distribuídos adicionariam coordenação sem benefício neste escopo. O extrato passará por service e repository com SQL parametrizado. Strategies escolherão spreads; um único motor aplicará a fórmula. Angular usará estado local por funcionalidade, sem gerenciador global inicialmente.
 
-A estrutura fixa Java 21, Spring Boot 3.5.16, Maven 3.9.16, Angular 21.2.0, Node 22.16.0, TypeScript 5.9.2 e PostgreSQL 17.11. Dependências e compatibilidade estão em [toolchain](docs/versions.md). O bloco 2 acrescenta JPA, Flyway, PostgreSQL, Bean Validation, Spring Security, OpenAPI e Testcontainers para os casos de uso implementados. A autenticação inicial usa configuração externa/Basic e formulário padrão, com CSRF ativo; sessão própria e papéis vêm no bloco 6.
+A estrutura fixa Java 21, Spring Boot 3.5.16, Maven 3.9.16, Angular 21.2.0, Node 22.16.0, TypeScript 5.9.2 e PostgreSQL 17.11. Dependências e compatibilidade estão em [toolchain](docs/versions.md). O bloco 2 acrescenta JPA, Flyway, PostgreSQL, Bean Validation, Spring Security, OpenAPI e Testcontainers para os casos de uso implementados. A autenticação usa duas contas externas, sessão e CSRF desde o bloco 6.
 
 ## Política financeira
 
@@ -26,13 +26,11 @@ Sem pagamentos reais, saldo, liquidação parcial, estorno, importação de arqu
 
 GitHub Flow: branches curtas por funcionalidade e integração por pull requests na main. Conventional Commits em inglês e mudanças focadas. Cada PR explicará problema, decisão e evidências reais de validação; o template está em .github/pull_request_template.md. A CI começará com a estrutura e evoluirá junto das features. Não declarar testes, revisões, proteção de branch ou publicação que ainda não tenham ocorrido.
 
-## Estado
+## Estado e validação
 
-Bloco 2 implementado e validado localmente: motor decimal, prazo/elegibilidade, cadastro/consulta MVC, V1, precisão/constraints e erros correlacionados. O teste de versão antiga comprova o mecanismo otimista no modelo; a disputa entre liquidações permanece no bloco 4.
+Blocos 2 a 7 implementados. A CI evoluiu com as funcionalidades: testes/cobertura backend foram antecipados para 2.6 por decisão do autor; npm test entrou no bloco 6 e os relatórios Angular no bloco 7. A validação atual inclui PostgreSQL real com login restrito, golden cases, transações concorrentes e falhas de persistência/commit. Não se usa H2 ou exclusões de produção para cumprir limites. [Evidências por etapa](docs/quality.md).
 
-Por orientação do usuário, testes, cobertura e relatórios do backend foram antecipados para a task 2.6. A CI usa clean verify: 74 testes locais passaram, com PostgreSQL descartável real e os golden cases. JaCoCo exige 80%/70% geral e 95%/90% por classe financeira, sem exclusões de produção. Publicação de artefatos não transforma falha em sucesso. O frontend continua com lint/build até a implementação do painel; não há suíte vazia simulando validação funcional.
-
-Flyway e aplicação ainda podem usar o mesmo login neste bloco; as credenciais segregadas e a proteção do histórico serão implantadas antes da liquidação, no bloco 4. Os testes usam banco próprio do Testcontainers e não dependem do volume Compose. Não houve execução remota da CI desta branch, smoke financeiro integrado ou aferição de desempenho. Resultados em [qualidade](docs/quality.md).
+Operação usa Compose completo e credenciais SQL distintas. A API ainda recebe o segredo de migração ao iniciar; isso não isola um processo comprometido. Smoke final, p95 HTTP e walkthrough permanecem no bloco 8. Resultados locais não comprovam execução remota do CI desta branch.
 
 ## Câmbio e simulação — bloco 3
 
@@ -40,9 +38,9 @@ V2 mantém histórico USD/BRL com NUMERIC(16,8), vigência/registro em UTC e uni
 
 O provedor HTTP é chamado antes da transação de gravação, com duas tentativas totais e timeout de 1 segundo sobre a resposta inteira, incluindo corpo bloqueado, mais 100 ms entre tentativas. Somente timeout/conexão/5xx são transitórios neste contrato; 4xx/payload inválido falham sem retry. A sincronização usa ON CONFLICT DO NOTHING: mesma vigência/valor recupera o original; outro valor conflita. Não reescreve origem ou registro histórico.
 
-A simulação captura um único instante para prazo e câmbio, é read-only e não cadastra recebível/liquidação. USD usa cotação local; BRL não depende dela. APP_ROLES protege mutações cambiais com ADMIN já nesta etapa, mantendo CSRF. A conta ainda é única; contas separadas e autenticação própria ficam no bloco 6.
+A simulação captura um único instante para prazo e câmbio, é read-only e não cadastra recebível/liquidação. USD usa cotação local; BRL não depende dela. As mutações cambiais exigem ADMIN e CSRF. A conta inicial única foi substituída por contas separadas no bloco 6.
 
-O Compose acrescenta somente o mock em Python stdlib, sem acoplá-lo à inicialização da API. A vigência é fixada ao iniciar, com sincronização explícita; não há alegação de dados de mercado. A credencial do banco ainda será segregada e impedida de alterar histórico no bloco 4. Logs de tentativas e contador existem agora; o formato JSON e as métricas financeiras do produto permanecem no bloco 7.
+O bloco 3 acrescentou o mock em Python stdlib, sem acoplá-lo à inicialização da API; o bloco 7 completou a orquestração. A vigência é fixada ao iniciar, com sincronização explícita; não há alegação de dados de mercado. A credencial do banco foi segregada no bloco 4. Logs JSON e métricas financeiras foram concluídos no bloco 7.
 
 Validação atual: 126 testes, 96,68% linhas/86,36% branches; limites JaCoCo preservados. A suíte HTTP prova as duas tentativas e término abaixo de 3 segundos nos cenários locais de timeout, sem inferir capacidade de produção. [Detalhes](docs/quality.md).
 
@@ -56,7 +54,7 @@ Liquidações e câmbio não têm UPDATE/DELETE/TRUNCATE pelo runtime, que não 
 
 O teste financeiro usa login real srm_app e duas transações lendo a mesma versão sob barreira; espera um commit, um conflito, uma auditoria e um incremento. Falhas antes/depois do INSERT, no commit diferido e após commit na resposta verificam rollback e recuperação. Os mecanismos de coordenação/injeção permanecem exclusivamente no harness de testes. Não há hooks no código de produção.
 
-O diagrama acompanha as constraints: settlement_id da idempotência é FK sem UNIQUE, portanto não se promete relação 1:1 no banco. O fluxo normal cria um resultado por intenção; não foi adicionada migration apenas para acomodar um diagrama. O extrato e a instrumentação de métricas pós-commit continuam nos blocos 5/7; este bloco registra o evento de confirmação após commit, sem alegar métrica financeira já disponível.
+O diagrama acompanha as constraints: settlement_id da idempotência é FK sem UNIQUE, portanto não se promete relação 1:1 no banco. O fluxo normal cria um resultado por intenção; não foi adicionada migration apenas para acomodar um diagrama. O extrato foi acrescentado no bloco 5 e as métricas pós-commit no bloco 7, preservando essa fronteira transacional.
 
 ## Extrato e consultas SQL — bloco 5
 
@@ -66,7 +64,7 @@ Filtros opcionais são fragmentos fixos e valores são vinculados por parâmetro
 
 V5 adiciona três índices iniciais. O teste de planos executa as mesmas strings do repository com papel restrito em PostgreSQL descartável, após carga idempotente de 10000 recebíveis/5000 liquidações e VACUUM ANALYZE. Mantivemos os índices sem forçar o planejador ou criar um índice combinado sem evidência. Contagens e totais amplos ainda percorrem todo o filtro; offset alto pode custar mais. O fixture SQL não executa a API de confirmação nem resultados idempotentes e não comprova throughput financeiro ou p95 HTTP.
 
-Resultado atual: 190 testes, cobertura geral 96,78% linhas/86,97% branches, preservando todos os mínimos. A CI inclui o relatório de planos nos artefatos de testes. A execução remota desta branch, o painel e a aferição HTTP permanecem pendentes. [Planos e método](docs/statements.md).
+Resultado atual: 190 testes, cobertura geral 96,78% linhas/86,97% branches, preservando todos os mínimos. A CI inclui o relatório de planos nos artefatos de testes. O painel foi concluído no bloco 6; a aferição HTTP permanece no bloco 8. A execução remota da branch atual ainda não foi verificada. [Planos e método](docs/statements.md).
 
 ## Sessão e painel — bloco 6
 
@@ -74,4 +72,12 @@ Duas contas externas em memória substituem a conta provisória e HTTP Basic. AD
 
 O Angular usa serviços locais por fluxo, sem store global. O switchMap externo cancela a requisição antiga assim que uma entrada muda; timer(300) espera a estabilização da nova entrada. O cliente não calcula dinheiro: normaliza e agrupa strings, inclusive valores acima do limite seguro de inteiros JavaScript. A intenção de confirmação conserva UUID/corpo em memória para retry manual; PRICE_CHANGED requer novo preço e aceite. Após recarga, consulta-se estado/histórico antes de tentar novamente. Cadastro de título não é idempotente; resposta perdida requer consulta antes de recadastro.
 
-Datas do extrato pertencem a São Paulo, com dia final inclusivo convertido ao início exclusivo do dia seguinte, incluindo transições históricas de horário de verão. Contagem/totais vêm do servidor. A CI passa a executar a suíte Angular, mantendo os gates backend. Compose completo, observabilidade e validação final permanecem nos blocos 7 e 8.
+Datas do extrato pertencem a São Paulo, com dia final inclusivo convertido ao início exclusivo do dia seguinte, incluindo transições históricas de horário de verão. Contagem/totais vêm do servidor. A CI passa a executar a suíte Angular, mantendo os gates backend. O bloco 7 completou Compose/observabilidade; a validação final permanece no bloco 8.
+
+## Operação e prevenção — bloco 7
+
+Logs JSON padronizam evento, outcome e correlação; timestamp é normalizado a UTC sem mudar o relógio financeiro. Evitamos body, paths/queries arbitrários, headers e detalhes SQL nos eventos da aplicação. IDs de auditoria ficam nos logs, sem virar tags de métricas. O contador de confirmações fica na fachada depois do retorno do proxy transacional, apenas em confirmação nova. Ele pode perder eventos entre commit/emissão ou reinício: o extrato persistido é a autoridade. Timer envolve somente o motor e aceita moeda/resultado como dimensões limitadas; não representa p95 HTTP. [Semântica](docs/observability.md).
+
+Compose fornece nginx/proxy, API, PostgreSQL, bootstrap e mock com healthchecks. A API independe do mock para iniciar/confirmar; readiness verifica SQL e liveness verifica o processo. Hikari limita aquisição/validação de conexões a 2 s/1 s. O build da imagem não executa integrações que exigem Docker; clean verify obrigatório da CI faz essa validação fora do builder. Não há deploy automático, coletor Prometheus ou orquestração de produção.
+
+REVIEW prioriza perda financeira/segurança no Anexo A, com correção e prevenção por achado, distinguindo ausência no trecho de ausência em toda a aplicação. O ER e C4 representam o sistema implementado, sem contêineres fictícios para as camadas MVC. GitHub Flow/PRs mantêm as decisões revisáveis. Não há estudo de alta escala, EDA ou post-mortem do Anexo B nesta entrega.

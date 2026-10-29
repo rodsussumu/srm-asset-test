@@ -64,5 +64,13 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
       - run: npm run lint
-      - run: npm test
+      - name: Test Angular
+        run: npm test -- --reporters=default --reporters=junit --output-file=test-results.xml
       - run: npm run build
+      - name: Publish frontend test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frontend-test-results
+          path: frontend/test-results.xml
+          retention-days: 14

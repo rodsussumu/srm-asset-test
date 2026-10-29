@@ -14,6 +14,9 @@ spring:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/srm}
     username: ${DATABASE_USER:srm_app}
     password: ${DATABASE_PASSWORD}
+    hikari:
+      connection-timeout: 2000
+      validation-timeout: 1000
   flyway:
     user: ${MIGRATION_USER}
     password: ${MIGRATION_PASSWORD}
@@ -56,5 +59,8 @@ management:
           include: readinessState,db
       show-details: never
 logging:
-  pattern:
-    level: "%5p [correlationId=%X{correlationId:-}]"
+  structured:
+    format:
+      console: logstash
+    json:
+      customizer: com.srm.credit.config.UtcTimestampJsonCustomizer
