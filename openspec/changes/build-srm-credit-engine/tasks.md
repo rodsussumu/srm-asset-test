@@ -53,12 +53,12 @@ Executar por etapas, com uma branch por funcionalidade e pull request para main.
 
 ## 7. Operação e documentação da plataforma
 
-- [ ] 7.1 Adicionar logs JSON e métricas de confirmações/latência; verificar correlação, ausência de segredos/labels de alta cardinalidade e contador que só cresce após commit e não cresce no replay; documentar exemplos de consulta e limites das métricas.
-- [ ] 7.2 Completar Docker Compose com frontend/proxy, backend, PostgreSQL e mock, healthchecks e configuração externa; verificar subida limpa, credencial restrita da aplicação, readiness sem banco e operação BRL/USD com provedor fora e cotação local válida.
-- [ ] 7.3 Completar GitHub Actions com testes unitários, integrações PostgreSQL, lint e build dos dois projetos; verificar execução dos golden cases, concorrência, rollback, migrations e testes Angular, sem sucesso aparente após falha obrigatória.
-- [ ] 7.4 Escrever `REVIEW.md` do Anexo A priorizando impacto financeiro e segurança, com correção e prevenção por achado; verificar cobertura de injeção SQL, taxas percentuais, precisão, idempotência, transação, concorrência, auditoria e falso sucesso.
-- [ ] 7.5 Atualizar ER e C4 níveis 1 e 2 para refletir a implementação e finalizar README/DECISIONS; verificar setup, comandos, restrições, escolhas de stack e estratégia de branches com links válidos.
-- [ ] 7.6 Atualizar `AI_USAGE.md` com colaboração efetiva, ao menos um erro real detectado e decisões mantidas pelo autor; verificar a evidência e manter este item pendente se o requisito ainda não puder ser sustentado.
+- [x] 7.1 Adicionar logs JSON e métricas de confirmações/latência; verificar correlação, ausência de segredos/labels de alta cardinalidade e contador que só cresce após commit e não cresce no replay; documentar exemplos de consulta e limites das métricas.
+- [x] 7.2 Completar Docker Compose com frontend/proxy, backend, PostgreSQL e mock, healthchecks e configuração externa; verificar subida limpa, credencial restrita da aplicação, readiness sem banco e operação BRL/USD com provedor fora e cotação local válida.
+- [x] 7.3 Completar GitHub Actions com testes unitários, integrações PostgreSQL, lint e build dos dois projetos; verificar execução dos golden cases, concorrência, rollback, migrations e testes Angular, sem sucesso aparente após falha obrigatória.
+- [x] 7.4 Escrever `REVIEW.md` do Anexo A priorizando impacto financeiro e segurança, com correção e prevenção por achado; verificar cobertura de injeção SQL, taxas percentuais, precisão, idempotência, transação, concorrência, auditoria e falso sucesso.
+- [x] 7.5 Atualizar ER e C4 níveis 1 e 2 para refletir a implementação e finalizar README/DECISIONS; verificar setup, comandos, restrições, escolhas de stack e estratégia de branches com links válidos.
+- [x] 7.6 Atualizar `AI_USAGE.md` com colaboração efetiva, ao menos um erro real detectado e decisões mantidas pelo autor; verificar a evidência e manter este item pendente se o requisito ainda não puder ser sustentado.
 
 ## 8. Validação integrada e preparação da defesa
 

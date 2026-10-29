@@ -131,6 +131,45 @@ class SettlementIntegrationTest {
   @MockitoSpyBean IdempotencyRepository idempotency;
   @MockitoSpyBean FxProviderClient provider;
 
+  @Autowired io.micrometer.core.instrument.MeterRegistry metrics;
+
+  private double confirmations() {
+    return metrics.get("settlements.confirmed").tag("currency", "BRL").counter().count();
+  }
+
+  @Test
+  void confirmationMetricWaitsForCommitAndThreeReplaysDoNotIncrementIt() throws Exception {
+    UUID id = seed("BRL", "DUPLICATA", "100000.00", 90);
+    double before = confirmations();
+    long timings =
+        metrics.find("pricing.duration").tag("currency", "BRL").timers().stream()
+            .mapToLong(io.micrometer.core.instrument.Timer::count)
+            .sum();
+    doAnswer(
+            invocation -> {
+              invocation.callRealMethod();
+              assertThat(confirmations()).isEqualTo(before);
+              assertThat(
+                      org.springframework.transaction.support.TransactionSynchronizationManager
+                          .isActualTransactionActive())
+                  .isTrue();
+              return null;
+            })
+        .when(idempotency)
+        .complete(anyString(), any(UUID.class), any(), any());
+    String key = UUID.randomUUID().toString();
+    var request = body(id, "BRL", "92859.94", null);
+    submit("operator", key, request).andExpect(status().isCreated());
+    assertThat(confirmations()).isEqualTo(before + 1);
+    for (int i = 0; i < 3; i++) submit("operator", key, request).andExpect(status().isCreated());
+    assertThat(confirmations()).isEqualTo(before + 1);
+    assertThat(
+            metrics.find("pricing.duration").tag("currency", "BRL").timers().stream()
+                .mapToLong(io.micrometer.core.instrument.Timer::count)
+                .sum())
+        .isEqualTo(timings + 1);
+  }
+
   @BeforeEach
   void clean() {
     READS.hook = (id, value) -> {};
@@ -524,6 +563,7 @@ class SettlementIntegrationTest {
   @ValueSource(booleans = {false, true})
   void failureBeforeOrAfterAuditInsertRollsBackAllWritesAndDoesNotConsumeKey(boolean afterInsert)
       throws Exception {
+    double beforeMetric = confirmations();
     UUID id = seed("BRL", "DUPLICATA", "100000.00", 90);
     doAnswer(
             invocation -> {
@@ -559,6 +599,7 @@ class SettlementIntegrationTest {
     assertThat(failure.getResponse().getContentAsString())
         .doesNotContain("SELECT", "password", "hidden_internal_table");
     assertUnsettled(id);
+    assertThat(confirmations()).isEqualTo(beforeMetric);
     doCallRealMethod().when(settlements).save(any(Settlement.class));
     submit("operator", key, request).andExpect(status().isCreated());
     assertConfirmed(id);
@@ -566,6 +607,7 @@ class SettlementIntegrationTest {
 
   @Test
   void deferredCommitFailureCannotReturnSuccessAndRollsBackTheCompletedResult() throws Exception {
+    double beforeMetric = confirmations();
     UUID id = seed("BRL", "DUPLICATA", "100000.00", 90);
     admin.execute(
         "CREATE FUNCTION test_fail_commit() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'injected deferred failure' USING ERRCODE='23514'; END; $$");
@@ -578,6 +620,7 @@ class SettlementIntegrationTest {
           .andExpect(status().isInternalServerError())
           .andExpect(jsonPath("$.code").value("INTERNAL_ERROR"));
       assertUnsettled(id);
+      assertThat(confirmations()).isEqualTo(beforeMetric);
     } finally {
       admin.execute("DROP TRIGGER test_fail_commit ON settlements");
       admin.execute("DROP FUNCTION test_fail_commit()");

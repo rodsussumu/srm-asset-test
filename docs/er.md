@@ -1,6 +1,6 @@
 # Modelo relacional implementado
 
-Os blocos 2 a 4 implementam cedentes, recebíveis, histórico de câmbio, liquidações e registros idempotentes. Todas as tabelas abaixo participam dos fluxos implementados.
+As migrations V1–V5 implementam cedentes, recebíveis, histórico de câmbio, liquidações e registros idempotentes. Todas as tabelas abaixo participam dos fluxos implementados.
 
 ```mermaid
 erDiagram
@@ -17,7 +17,7 @@ erDiagram
     RECEIVABLES {
         UUID id PK
         UUID assignor_id FK
-        NUMERIC face_value
+        NUMERIC face_value "18,2; BRL"
         VARCHAR face_currency
         DATE due_date
         VARCHAR type
@@ -54,6 +54,9 @@ erDiagram
         VARCHAR payment_currency
         UUID fx_rate_id FK
         NUMERIC fx_rate "16,8; quando USD"
+        VARCHAR fx_origin
+        TIMESTAMPTZ fx_effective_at
+        TIMESTAMPTZ fx_recorded_at
         VARCHAR policy_version
         UUID correlation_id
         TIMESTAMPTZ settled_at
@@ -86,3 +89,5 @@ O resultado idempotente guarda JSON como TEXT, preservando os bytes e o status/L
 Verificação: `./mvnw -Dtest=ReceivablesIntegrationTest,SettlementSchemaTest,SettlementIntegrationTest test`. Inclui migrations em banco limpo, constraints, login restrito real, precisão, disputa da mesma versão, rollback e replay. V5 adiciona índices de extrato por instante/id, cedente/instante/id e moeda/instante/id. Os planos foram aferidos na massa sintética, sem mudar as tabelas ou o histórico: [consultas e evidência](statements.md).
 
 A FK settlement_id da idempotência não possui UNIQUE: o banco admite múltiplos registros apontando para a mesma liquidação. O protocolo normal cria um resultado por intenção confirmada; o diagrama não impõe uma cardinalidade 1:1 inexistente no schema.
+
+Sessões e métricas são estado em memória da API, sem tabelas adicionais. [C4 níveis 1 e 2](c4.md) e [operação local](operations.md).

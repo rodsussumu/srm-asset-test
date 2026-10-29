@@ -27,3 +27,5 @@ O usuário de migração precisa criar papéis e conceder privilégios. Em produ
 - Um constraint trigger diferido exige conclusão da reserva antes do commit. Rollback remove a reserva automaticamente, permitindo nova tentativa com a mesma chave.
 
 Administradores do banco continuam uma fronteira de confiança. Os testes usam login real srm_app, sem SET ROLE sobre conexão de superusuário, e validam tanto a gravação permitida quanto a recusa de alteração/exclusão do histórico.
+
+Na orquestração completa, docker compose up --build -d --wait executa postgres, bootstrap e API nessa ordem automaticamente. Os comandos separados acima permanecem úteis no desenvolvimento no host. [Operação e portas](operations.md).

@@ -10,14 +10,14 @@ A IA auxilia na organização das seis capacidades OpenSpec, premissas financeir
 
 A stack, a arquitetura MVC, a sequência de trabalho e o fluxo de branches/PRs foram definidos pelo autor. A validação comercial das premissas, a revisão do código e a capacidade de modificá-lo na defesa continuam sob sua responsabilidade.
 
-## Evidências a registrar
+## Evidências e estado atual
 
 - Prompts estratégicos de implementação e sua finalidade, sem transcrever sessões inteiras.
-- Ao menos um erro concreto da IA e o teste ou review que o detectou. Este item ainda está pendente; não há erro de implementação comprovado nesta etapa.
+- Erro concreto detectado no bloco 3: omissão do 200 no OpenAPI de FX; teste de contrato falhou antes da correção. [Extrato do log original](docs/evidence/openapi-regression.txt) e [teste preservado](backend/src/test/java/com/srm/credit/FxIntegrationTest.java).
 - Resultados reais de golden cases, concorrência, rollback, retry e verificações da interface.
 - Decisões aceitas, corrigidas ou rejeitadas pelo autor ao longo das etapas.
 
-Ainda não foram executados testes da aplicação, smoke ou aferição de desempenho neste repositório. A defesa ao vivo também permanece pendente.
+Os relatos abaixo registram o estado de cada etapa. Atualmente há testes backend/Angular e verificações operacionais locais; smoke final, aferição HTTP e defesa ao vivo permanecem pendentes.
 
 ## Estrutura inicial — 28/10/2026
 
@@ -82,3 +82,15 @@ O estado foi separado dos templates, com cancelamento da requisição anterior a
 A validação local resultou em 195 testes backend, 48 Angular, lint/build e gates JaCoCo aprovados (96,95% linhas e 85,71% branches). O esbuild abortou nas tentativas dentro do sandbox; o build autorizado fora dele concluiu, sem mudança de dependências ou remoção de verificações. Isso foi registrado como limitação observada do ambiente, sem fabricar um erro de regra financeira.
 
 O navegador confirmou login de operador, cadastro por teclado, C1, liquidação BRL, extrato, recarga/consulta e logout em banco descartável separado. Evidências e identificadores estão em docs/quality.md. Não houve mudança no .env real nem nos volumes habituais. Execução remota do CI, smoke completo BRL/USD e aferição HTTP permanecem pendentes nos blocos próprios.
+
+## Operação, review e evidência consolidada — 29/10/2026
+
+O autor autorizou o próximo bloco após integrar a PR #7. O merge foi confirmado e feat/operational-readiness partiu da main. O escopo 7.1–7.6 reuniu logs JSON UTC, contador pós-commit, tempo do motor, Compose completo/healthchecks, relatórios Angular na CI, REVIEW do Anexo A e ER/C4. O prompt estratégico foi manter as regras financeiras/contratos existentes e verificar falhas reais das dependências em um projeto descartável, com dados criados pela API.
+
+BusinessMetrics foi aplicado nos services para manter o model puro. A fachada só registra confirmação depois do retorno do proxy transacional; replay não adiciona confirmação ou cálculo. Testes verificaram contador antes do commit, após sucesso, em três replays e após rollback. O script operacional confirmou cookie, usuário SQL restrito, provedor fora com C1/C3, diagnóstico sem banco e logs reais sem canários. Foram 197 testes backend, 48 Angular e builds/lint aprovados; não se inferiu desempenho HTTP das métricas do motor. Resultados e comandos estão em docs/quality.md e docs/operations.md.
+
+O caso concreto de erro da IA permanece o observado no bloco 3: a primeira anotação de GET /api/v1/fx-rates/current declarava 503 e omitia 200. Inspeção do OpenAPI gerado motivou uma asserção de regressão que falhou com No value at JSON path e BUILD FAILURE. A correção declarou 200 explicitamente, preservou ProblemDetail nos erros e passou na suíte completa. O log temporário original foi conferido e seu extrato sem dados de ambiente foi versionado em docs/evidence/openapi-regression.txt, identificado como execução anterior. O teste continua no código. Não foi fabricado defeito financeiro nem um novo erro nesta etapa para cumprir o relatório.
+
+Decisões mantidas pelo autor: Java/Angular/PostgreSQL, MVC com camadas criadas junto das features, sequência specs → estrutura → blocos e integração por branches/PRs. Não se delegam à IA a aprovação comercial das premissas, autorização para publicação/convites, aceite final ou a capacidade de explicar/modificar o próprio código na defesa. A revisão humana final continua sob responsabilidade do autor; este relatório não afirma que ela já ocorreu.
+
+A IA auxiliou implementação, análise do Anexo A e verificação; a geração dos documentos não substitui avaliação humana. CI remota desta branch, smoke final, aferição HTTP e walkthrough permanecem explicitamente pendentes. O ambiente habitual foi preservado.

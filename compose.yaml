@@ -14,7 +14,6 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
-
   db-bootstrap:
     image: postgres:17.11-alpine
     environment:
@@ -30,13 +29,56 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: jdbc:postgresql://postgres:5432/srm
+      DATABASE_USER: ${DATABASE_USER:-srm_app}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:?Configure DATABASE_PASSWORD no .env}
+      MIGRATION_USER: ${MIGRATION_USER:-srm}
+      MIGRATION_PASSWORD: ${MIGRATION_PASSWORD:?Configure MIGRATION_PASSWORD no .env}
+      APP_USERNAME: ${APP_USERNAME:-operator}
+      APP_PASSWORD: ${APP_PASSWORD:?Configure APP_PASSWORD no .env}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Configure ADMIN_PASSWORD no .env}
+      FX_PROVIDER_URL: http://fx-mock:8090/rate
+      PRICING_BASE_RATE: ${PRICING_BASE_RATE:-0.0100}
+    ports:
+      - '127.0.0.1:${BACKEND_PORT:-8080}:8080'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      db-bootstrap:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ['CMD', 'bash', '/app/healthcheck.sh']
+      interval: 5s
+      timeout: 4s
+      start_period: 40s
+      retries: 10
+  frontend:
+    build: ./frontend
+    ports:
+      - '127.0.0.1:${FRONTEND_PORT:-4200}:80'
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '-O', '/dev/null', 'http://127.0.0.1/health']
+      interval: 5s
+      timeout: 3s
+      retries: 10
   fx-mock:
     build: ./infra/fx-mock
     environment:
       FX_MOCK_RATE: ${FX_MOCK_RATE:-5.4321}
     ports:
       - '127.0.0.1:${FX_MOCK_PORT:-8090}:8090'
-
+    healthcheck:
+      test: ['CMD', 'python', '-c', "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8090/rate', timeout=2).close()"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 volumes:
   postgres_data:

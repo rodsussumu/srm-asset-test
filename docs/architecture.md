@@ -17,7 +17,7 @@ Angular separará apresentação, serviços de API e estado local por fluxo. Din
 
 A aquisição confirmará recebível, snapshot financeiro e resposta idempotente na mesma transação. Câmbio externo será sincronizado separadamente; a liquidação consultará cotação persistida válida. O extrato usará SQL parametrizado e snapshot consistente por resposta.
 
-O [ER](er.md) reflete as tabelas e índices das migrations V1–V5. O C4 final será adicionado e confrontado com a implementação no bloco 7. O [desenho OpenSpec](../openspec/changes/build-srm-credit-engine/design.md) contém os modelos iniciais.
+O [ER](er.md) reflete as tabelas e índices das migrations V1–V5. O [C4 níveis 1 e 2](c4.md) representa a SPA no navegador e os contêineres do Compose. O [desenho OpenSpec](../openspec/changes/build-srm-credit-engine/design.md) contém os modelos iniciais.
 
 ## Liquidação implementada
 
@@ -36,3 +36,9 @@ O service abre uma transação read-only REQUIRES_NEW/REPEATABLE READ para pági
 Spring Security autentica e encerra sessões pelos filtros do framework; AuthController expõe apenas CSRF e identidade. Não há acesso a repositories nesse controller. Credenciais externas de duas contas são codificadas com BCrypt na inicialização; ADMIN acumula OPERATOR. A sessão protege as rotas de negócio e mantém CSRF nas mutações.
 
 Angular separa templates/componentes, CreditApi, Session e estados CreditState/StatementState. switchMap cancela a simulação anterior imediatamente, inclusive durante os 300 ms de espera da nova entrada. A confirmação guarda chave/corpo em memória até um resultado definido; nenhuma confirmação é repetida automaticamente. Dinheiro permanece string. Os filtros do extrato convertem datas civis São Paulo para instantes UTC. [Painel e limites](workspace.md).
+
+## Operação e observabilidade
+
+O Compose constrói backend e bundle Angular, serve a SPA por nginx e encaminha API/Actuator/OpenAPI na mesma origem. Bootstrap termina antes da API; nginx aguarda readiness. PostgreSQL, API, nginx e mock têm healthchecks distintos. A API não depende de chamada ao provedor para iniciar ou confirmar.
+
+BusinessMetrics é suporte da aplicação: envolve o cálculo nos services, sem introduzir Micrometer no model financeiro. A fachada SettlementService incrementa/loga confirmação após o retorno do proxy transacional e apenas quando replay=false. CorrelationFilter/handler registram eventos com campos JSON, sem request body, query ou headers. [Semântica e limites](observability.md).

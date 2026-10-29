@@ -106,6 +106,10 @@ public class FxProviderClient {
 
   private void record(int attempt, String outcome) {
     meters.counter("fx.sync.attempts", "outcome", outcome).increment();
-    LOG.info("event=fx_sync_attempt attempt={} outcome={}", attempt, outcome);
+    LOG.atInfo()
+        .addKeyValue("event", "fx_sync_attempt")
+        .addKeyValue("attempt", attempt)
+        .addKeyValue("outcome", outcome)
+        .log("Tentativa de sincronização cambial.");
   }
 }

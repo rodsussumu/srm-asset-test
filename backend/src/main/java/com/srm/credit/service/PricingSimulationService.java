@@ -1,5 +1,6 @@
 package com.srm.credit.service;
 
+import com.srm.credit.config.BusinessMetrics;
 import com.srm.credit.dto.FxRateResponse;
 import com.srm.credit.dto.PricingSimulationRequest;
 import com.srm.credit.dto.PricingSimulationResponse;
@@ -15,13 +16,19 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class PricingSimulationService {
   private final PricingEngine engine;
+  private final BusinessMetrics metrics;
   private final MonthlyTermPolicy termPolicy;
   private final FxRateService rates;
   private final Clock clock;
 
   public PricingSimulationService(
-      PricingEngine engine, MonthlyTermPolicy termPolicy, FxRateService rates, Clock clock) {
+      PricingEngine engine,
+      MonthlyTermPolicy termPolicy,
+      FxRateService rates,
+      Clock clock,
+      BusinessMetrics metrics) {
     this.engine = engine;
+    this.metrics = metrics;
     this.termPolicy = termPolicy;
     this.rates = rates;
     this.clock = clock;
@@ -33,12 +40,15 @@ public class PricingSimulationService {
     var term = termPolicy.evaluate(request.dueDate(), operationAt);
     var fx = request.paymentCurrency() == PaymentCurrency.USD ? rates.selectAt(operationAt) : null;
     var result =
-        engine.calculate(
-            face,
-            request.type(),
-            term.months(),
+        metrics.price(
             request.paymentCurrency(),
-            fx == null ? null : fx.getRate());
+            () ->
+                engine.calculate(
+                    face,
+                    request.type(),
+                    term.months(),
+                    request.paymentCurrency(),
+                    fx == null ? null : fx.getRate()));
     return new PricingSimulationResponse(
         true,
         face.toPlainString(),

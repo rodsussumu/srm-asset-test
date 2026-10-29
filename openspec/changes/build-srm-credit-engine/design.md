@@ -2,7 +2,7 @@
 
 ## Context
 
-O projeto possui estrutura inicial e blocos 2 a 6: cadastro MVC, motor/câmbio/simulação, liquidação ACID/idempotente, auditoria, extrato SQL e painel Angular com sessão/CSRF. V1–V5 mantêm precisão, permissões e índices. A validação local inclui 195 testes backend, 48 Angular e builds/lint. A task 2.6 mantém cobertura/artefatos backend na CI e o bloco 6 acrescenta npm test. Aferição HTTP e smoke final vêm no bloco 8; Compose completo e observabilidade vêm no bloco 7. Premissas foram definidas no SPEC antes do código.
+O projeto possui blocos 2 a 7: domínio/MVC, câmbio, liquidação ACID/idempotente, extrato, sessão/painel, logs JSON/métricas e Compose completo. V1–V5 mantêm precisão, permissões e índices. A validação local inclui 197 testes backend, 48 Angular e checks operacionais pelo proxy com provedor/banco parados e recuperados. A CI mantém verify/cobertura backend e publica JUnit Angular; execução remota desta branch não foi verificada. REVIEW, ER/C4 e evidências de uso de IA estão documentados. Smoke final, aferição HTTP e walkthrough permanecem no bloco 8. Premissas foram definidas no SPEC antes do código.
 
 ## Goals / Non-Goals
 
@@ -142,7 +142,7 @@ flowchart LR
     API -->|somente sincronização| FX[Mock HTTP de câmbio]
 ```
 
-Os diagramas finais serão criados em docs/c4.md e docs/er.md, ligados no README, e deverão distinguir SPA no navegador, nginx, API, PostgreSQL, bootstrap e provedor mockado.
+Os diagramas finais estão em docs/c4.md e docs/er.md, ligados no README, distinguindo SPA no navegador, nginx, API, PostgreSQL, bootstrap e provedor mockado.
 
 ## Risks / Trade-offs
 

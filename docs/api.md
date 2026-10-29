@@ -1,4 +1,4 @@
-# API implementada nos blocos 2 a 6
+# API implementada nos blocos 2 a 7
 
 Base: `/api/v1`. Rotas de negócio exigem sessão autenticada. O painel em português consome a API pela mesma origem.
 
@@ -103,3 +103,7 @@ Retry com mesma chave e conteúdo normalizado devolve exatamente 201/corpo/Locat
 GET `/settlements` exige from/to como instantes com fuso em intervalo `[from,to)` de até 366 dias. Filtros opcionais assignorId UUID e currency BRL/USD; page a partir de zero, size padrão 20 e máximo 100. A resposta contém `{items,page,size,total,totalsByCurrency}`. Itens são snapshots SettlementResponse; totais têm `{currency,count,paymentTotal}` com valor decimal como string para todo o filtro, independente da página. Moedas sem registros são omitidas; página além da última permanece 200 e mantém contagem/totais.
 
 Ordem fixa settledAt/id decrescente, sem parâmetro de ordenação SQL. Página/contagem/totais usam um único snapshot read-only REPEATABLE READ. Novas requisições podem ver novas confirmações. Entradas inválidas retornam 400 com campos e correlação. [Contrato detalhado, índices, massa e EXPLAIN ANALYZE](statements.md).
+
+## Diagnóstico
+
+GET /actuator/health/readiness inclui conexão SQL e GET /actuator/health/liveness informa o processo; são públicos sem detalhes. Actuator /metrics exige sessão. O nginx oferece /health estático, que não verifica SQL. [Operação](operations.md) e [métricas/logs](observability.md).

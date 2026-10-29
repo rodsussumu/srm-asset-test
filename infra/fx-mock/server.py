@@ -13,6 +13,10 @@ quote = {
 
 
 class Handler(BaseHTTPRequestHandler):
+    def log_message(self, format, *args):
+        # Do not log paths, headers or arbitrary request text.
+        pass
+
     def do_GET(self):
         if self.path != "/rate":
             self.send_error(404)
