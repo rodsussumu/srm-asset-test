@@ -7,8 +7,8 @@ Executar por etapas, com uma branch por funcionalidade e pull request para main.
 - [x] 1.1 Criar `SPEC.md` na raiz antes de código, com 1–2 páginas de premissas, perguntas ao negócio, precisão e critérios de aceite; verificar alinhamento com as seis specs e registrar a convenção teto(dias/30), validade cambial de 24 horas e atomicidade por recebível.
 - [x] 1.2 Criar `DECISIONS.md` e iniciar `AI_USAGE.md` com decisões reais, prompts estratégicos e lacunas explícitas; verificar que nenhum teste, erro da IA ou resultado ainda inexistente é apresentado como concluído.
 - [x] 1.3 Documentar GitHub Flow com branches por funcionalidade, conventional commits e PRs no README/DECISIONS; verificar a branch atual e exigir problema, decisão e validação nas descrições de PR.
-- [ ] 1.4 Fixar versões compatíveis e suportadas de Java/Spring Boot, Angular/Node e PostgreSQL com referência à documentação oficial; criar backend Maven Wrapper e frontend TypeScript estrito e verificar builds iniciais reproduzíveis com lockfile.
-- [ ] 1.5 Configurar lint e CI básica desde o início; verificar execução dos comandos locais de build/lint nos dois projetos e documentá-los no README.
+- [x] 1.4 Fixar versões compatíveis e suportadas de Java/Spring Boot, Angular/Node e PostgreSQL com referência à documentação oficial; criar backend Maven Wrapper e frontend TypeScript estrito e verificar builds iniciais reproduzíveis com lockfile.
+- [x] 1.5 Configurar lint e CI básica desde o início; verificar execução dos comandos locais de build/lint nos dois projetos e documentá-los no README.
 
 ## 2. Motor financeiro e cadastro de recebíveis
 

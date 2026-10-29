@@ -6,7 +6,7 @@ Java/Spring Boot, Angular e PostgreSQL são as escolhas do projeto. O backend se
 
 Adotar monólito: uma aquisição exige atomicidade entre estado, auditoria e idempotência. Serviços distribuídos adicionariam coordenação sem benefício neste escopo. O extrato passará por service e repository com SQL parametrizado. Strategies escolherão spreads; um único motor aplicará a fórmula. Angular usará estado local por funcionalidade, sem gerenciador global inicialmente.
 
-As versões compatíveis de Java LTS/Spring Boot, Angular/Node e PostgreSQL serão fixadas na estrutura inicial, com referências e lockfiles. Esta etapa não contém dependências executáveis.
+A estrutura fixa Java 21, Spring Boot 3.5.16, Maven 3.9.16, Angular 21.2.0, Node 22.16.0, TypeScript 5.9.2 e PostgreSQL 17.11. Dependências e compatibilidade estão em [toolchain](docs/versions.md). O backend usa apenas Web/Actuator nesta etapa; persistência, autenticação e integrações serão adicionadas junto dos respectivos casos de uso, sem desativar auto-configurações para acomodar dependências antecipadas.
 
 ## Política financeira
 
@@ -28,4 +28,4 @@ GitHub Flow: branches curtas por funcionalidade e integração por pull requests
 
 ## Estado
 
-Somente especificações, planejamento e documentação inicial. Implementação, testes, resultados de desempenho, smoke, defesa e acesso dos avaliadores permanecem pendentes. O checklist OpenSpec registra o progresso deste repositório.
+Especificações e estrutura inicial implementadas. Backend e frontend possuem build/lint; o backend inicializa sem banco e expõe health. O Compose fixa PostgreSQL para desenvolvimento, mas a aplicação ainda não usa persistência. A CI inicial executa verify/lint/build; suítes funcionais, cobertura, integração completa, desempenho e defesa continuam pendentes. O checklist OpenSpec registra o progresso. Não confundir health do processo com readiness financeira, que será implementada com a persistência.

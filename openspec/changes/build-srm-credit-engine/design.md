@@ -2,7 +2,7 @@
 
 ## Context
 
-O projeto srm-asset-test está na etapa de especificação, sem backend ou frontend implementados. A stack prevista é Java, Angular e PostgreSQL. Motivação e limites funcionais estão em `proposal.md`; os contratos verificáveis estão nas seis specs desta mudança. O `SPEC.md` centraliza premissas e critérios de aceite. A implementação e a validação serão realizadas por blocos, com branches e pull requests.
+O projeto srm-asset-test possui especificação e estrutura inicial: backend Java/Spring Boot com health, frontend Angular e PostgreSQL de desenvolvimento fixado no Compose. As funcionalidades ainda não estão implementadas. A CI inicial verifica formatação/lint/build; testes funcionais e cobertura serão adicionados conforme os blocos. Motivação e limites funcionais estão em `proposal.md`; os contratos verificáveis estão nas seis specs desta mudança. O `SPEC.md` centraliza premissas e critérios de aceite. A implementação e a validação serão realizadas por blocos, com branches e pull requests.
 
 ## Goals / Non-Goals
 
