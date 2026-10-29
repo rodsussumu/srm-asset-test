@@ -1,9 +1,13 @@
-# API implementada nos blocos 2 a 5
+# API implementada nos blocos 2 a 6
 
-Base: `/api/v1`. As rotas abaixo exigem autenticação. O frontend ainda é o esqueleto; o painel de operação será implementado no bloco 6.
+Base: `/api/v1`. Rotas de negócio exigem sessão autenticada. O painel em português consome a API pela mesma origem.
 
 | Método e rota | Resultado |
 |---|---|
+| GET `/auth/csrf` | Público: obtém CSRF para login/mutações. |
+| POST `/auth/login` | Form URL encoded + CSRF; 204 ou 401/403. |
+| GET `/auth/me` | Identidade e papéis; 200 ou 401. |
+| POST `/auth/logout` | CSRF obrigatório; 204 e sessão invalidada. |
 | POST `/assignors` | Cria cedente; retorna 201 e Location. |
 | GET `/assignors/{id}` | Consulta cedente; retorna 200 ou 404. |
 | GET `/assignors?page=0&size=20` | Lista cedentes em página numerada a partir de zero. |
@@ -46,11 +50,9 @@ Recebível, substituindo assignorId pelo identificador criado e usando venciment
 
 As respostas usam DTOs e faceValue como string de duas casas, com faceCurrency BRL, dueDate, type, paymentCurrency, status, version e createdAt UTC. Não são expostas entidades JPA ou relacionamentos internos.
 
-## Autenticação e CSRF nesta etapa
+## Autenticação e CSRF
 
-O usuário configurado por APP_USERNAME/APP_PASSWORD continua sendo o usuário local do Spring Security. HTTP Basic e formulário padrão `/login` estão disponíveis. CSRF permanece ativo nas mutações: um cliente autenticado deve enviar também o token válido de sua sessão. Basic isoladamente não dispensa CSRF. Os testes HTTP usam o suporte oficial Spring Security Test para simular autenticação e token e passam pela cadeia real de filtros.
-
-O usuário local recebe `APP_ROLES=OPERATOR` por padrão. Configure `APP_ROLES=ADMIN` para registrar ou sincronizar câmbio; as duas mutações já exigem esse papel e CSRF, retornando 403 para OPERATOR. O fluxo próprio de login/logout, endpoint dedicado de CSRF e contas separadas pertencem ao bloco 6. O health é público; dados e documentação exigem autenticação. Para testes manuais nesta etapa, use `/login`, obtenha o token CSRF do formulário e preserve o cookie de sessão; o token após autenticação pode ser obtido ao consultar novamente `/login` com essa sessão. Envie-o no cabeçalho `X-CSRF-TOKEN` junto do cookie nas mutações. A rotação do token no login exige usar o token da sessão autenticada.
+Sessão Spring Security com contas externas OPERATOR e ADMIN (também operador). Cookie HttpOnly/SameSite=Lax e CSRF em todas as mutações, incluindo login/logout. Obtenha /auth/csrf antes do login e novamente após autenticar; /auth/login recebe username/password em application/x-www-form-urlencoded. /auth/me consulta identidade e /auth/logout encerra a sessão. O fluxo não usa HTTP Basic nem formulário HTML padrão. [Configuração, erros e limites](authentication.md).
 
 ## Câmbio
 
@@ -76,7 +78,7 @@ BRL não consulta câmbio; USD só consulta o banco, sem HTTP externo. Falta/exp
 
 ## OpenAPI e verificação
 
-Com o backend iniciado: `/swagger-ui/index.html` apresenta o contrato e `/v3/api-docs` retorna o OpenAPI gerado dos controllers/DTOs. O contrato declara strings monetárias, enums, parâmetros, respostas e autenticação Basic.
+Com o backend iniciado: `/swagger-ui/index.html` apresenta o contrato e `/v3/api-docs` retorna o OpenAPI gerado dos controllers/DTOs. O contrato declara strings monetárias, enums, parâmetros, respostas e autenticação por cookie JSESSIONID e cabeçalho X-CSRF-TOKEN nas mutações.
 
 No diretório backend, com Java 21 e Docker ativos:
 

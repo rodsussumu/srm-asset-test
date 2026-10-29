@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/receivables")
 @Tag(name = "Recebíveis")
-@SecurityRequirement(name = "basicAuth")
+@SecurityRequirement(name = "sessionAuth")
 public class ReceivableController {
   private final ReceivableService service;
 

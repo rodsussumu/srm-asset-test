@@ -45,11 +45,11 @@ Executar por etapas, com uma branch por funcionalidade e pull request para main.
 
 ## 6. Autenticação e painel Angular
 
-- [ ] 6.1 Implementar sessão, login/logout, papéis OPERATOR/ADMIN e CSRF com credenciais externas; verificar 401 anônimo, 403 por papel/token inválido, renovação da sessão/token e ausência de credenciais no armazenamento do navegador; documentar setup local.
-- [ ] 6.2 Criar formulário em português com estado separado da apresentação e valores como strings; verificar teclado, rótulos, mensagens de campo e formatação sem perda de centavos ou conversão monetária para Number.
-- [ ] 6.3 Conectar simulação com debounce de 300 ms e cancelamento de respostas antigas; verificar entradas inválidas, respostas fora de ordem, indisponibilidade de câmbio e apresentação de parâmetros/moedas.
-- [ ] 6.4 Integrar cadastro, confirmação e recuperação de retry; verificar chave/corpo estáveis após timeout, duplo clique, PRICE_CHANGED com nova confirmação e consulta de estado após recarga.
-- [ ] 6.5 Criar grid com filtros remotos, paginação, totais separados e estados vazio/erro/carregando; verificar retorno à página zero quando filtros mudam e conversão dos limites de datas São Paulo/UTC.
+- [x] 6.1 Implementar sessão, login/logout, papéis OPERATOR/ADMIN e CSRF com credenciais externas; verificar 401 anônimo, 403 por papel/token inválido, renovação da sessão/token e ausência de credenciais no armazenamento do navegador; documentar setup local.
+- [x] 6.2 Criar formulário em português com estado separado da apresentação e valores como strings; verificar teclado, rótulos, mensagens de campo e formatação sem perda de centavos ou conversão monetária para Number.
+- [x] 6.3 Conectar simulação com debounce de 300 ms e cancelamento de respostas antigas; verificar entradas inválidas, respostas fora de ordem, indisponibilidade de câmbio e apresentação de parâmetros/moedas.
+- [x] 6.4 Integrar cadastro, confirmação e recuperação de retry; verificar chave/corpo estáveis após timeout, duplo clique, PRICE_CHANGED com nova confirmação e consulta de estado após recarga.
+- [x] 6.5 Criar grid com filtros remotos, paginação, totais separados e estados vazio/erro/carregando; verificar retorno à página zero quando filtros mudam e conversão dos limites de datas São Paulo/UTC.
 
 ## 7. Operação e documentação da plataforma
 

@@ -28,7 +28,7 @@ Logs de `event=fx_sync_attempt` informam tentativa e resultado e recebem o corre
 
 O Compose inclui `fx-mock`, Python stdlib, em localhost:8090. `docker compose up --build -d fx-mock` inicia somente o mock. `GET /rate` retorna `FX_MOCK_RATE` (padrão 5.4321), origem local-mock e vigência fixada no início do processo. Reiniciar gera uma nova vigência; o mock não renova automaticamente a cotação nem a importa no backend. Após 24 horas, reinicie e sincronize novamente. Para execução direta: `python3 infra/fx-mock/server.py`; `FX_MOCK_EFFECTIVE_AT` permite fixar a vigência nesse modo. Não é uma fonte de cotação de mercado.
 
-No backend executado fora do Compose, exporte `FX_PROVIDER_URL` ou use o padrão localhost:8090/rate. Quando o backend for orquestrado no Compose, deverá usar http://fx-mock:8090/rate; nesta etapa ele é iniciado no host. O usuário local tem `APP_ROLES=OPERATOR` por padrão; configure `APP_ROLES=ADMIN` e reinicie o backend para operações administrativas. Contas separadas e fluxo próprio de sessão continuam no bloco 6.
+No backend executado fora do Compose, exporte `FX_PROVIDER_URL` ou use o padrão localhost:8090/rate. Quando o backend for orquestrado no Compose, deverá usar http://fx-mock:8090/rate; nesta etapa ele é iniciado no host. A conta APP_USERNAME opera; ADMIN_USERNAME também pode registrar/sincronizar câmbio. Configure ambas externamente, conforme [sessão](authentication.md). APP_ROLES não é mais utilizado.
 
 ## Evidência automatizada
 

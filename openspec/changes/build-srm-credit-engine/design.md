@@ -2,7 +2,7 @@
 
 ## Context
 
-O projeto possui estrutura inicial e blocos 2 a 5: cadastro MVC, motor/câmbio/simulação, liquidação ACID/idempotente, auditoria e extrato SQL parametrizado. V1–V5 mantêm precisão, permissões e índices. A validação local inclui 190 testes, snapshot do extrato perante inserção concorrente e planos SQL na massa sintética de 10000/5000 registros. A task 2.6 mantém testes/cobertura/artefatos na CI. Frontend funcional e sua suíte vêm no bloco 6; a aferição HTTP vem no bloco 8. Motivação e contratos estão na proposta e nas seis specs; premissas foram definidas no SPEC antes do código.
+O projeto possui estrutura inicial e blocos 2 a 6: cadastro MVC, motor/câmbio/simulação, liquidação ACID/idempotente, auditoria, extrato SQL e painel Angular com sessão/CSRF. V1–V5 mantêm precisão, permissões e índices. A validação local inclui 195 testes backend, 48 Angular e builds/lint. A task 2.6 mantém cobertura/artefatos backend na CI e o bloco 6 acrescenta npm test. Aferição HTTP e smoke final vêm no bloco 8; Compose completo e observabilidade vêm no bloco 7. Premissas foram definidas no SPEC antes do código.
 
 ## Goals / Non-Goals
 

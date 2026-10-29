@@ -1,21 +1,55 @@
-<main class="shell">
-  <p class="eyebrow">SRM Asset</p>
-  <h1>Credit Engine</h1>
-  <p class="intro">Estrutura inicial da plataforma de cessão de crédito.</p>
-  <section aria-label="Estrutura do projeto">
-    <article>
-      <h2>Backend</h2>
-      <p>Java · Spring Boot</p>
-    </article>
-    <article>
-      <h2>Frontend</h2>
-      <p>Angular · TypeScript</p>
-    </article>
-    <article>
-      <h2>Persistência</h2>
-      <p>PostgreSQL</p>
-    </article>
-  </section>
-  <p class="status">As funcionalidades serão implementadas nas próximas etapas.</p>
+<header class="topbar">
+  <a class="brand" href="/" aria-label="SRM Credit Engine, início"
+    ><span class="brand-mark">S</span
+    ><span>SRM <span class="brand-light">Credit Engine</span></span></a
+  >
+  @if (session.user(); as user) {
+    <div class="identity">
+      <span
+        >{{ user.username }} ·
+        {{ user.roles.includes('ADMIN') ? 'Administrador' : 'Operador' }}</span
+      ><button type="button" class="secondary" (click)="logout()" [disabled]="busy()">Sair</button>
+    </div>
+  }
+</header>
+<main id="main-content" class="shell">
+  @if (!session.ready()) {
+    <p role="status">Verificando sessão…</p>
+  } @else if (!session.user()) {
+    <section class="login panel" aria-labelledby="login-title">
+      <p class="eyebrow">Plataforma de cessão de crédito</p>
+      <h1 id="login-title">Acesse a mesa de operações</h1>
+      <p>Entre com sua conta de operador ou administrador.</p>
+      <form [formGroup]="form" (ngSubmit)="login()">
+        <div class="field">
+          <label for="username">Usuário</label
+          ><input id="username" autocomplete="username" formControlName="username" required />
+        </div>
+        <div class="field">
+          <label for="password">Senha</label
+          ><input
+            id="password"
+            type="password"
+            autocomplete="current-password"
+            formControlName="password"
+            required
+          />
+        </div>
+        <button type="submit" [disabled]="busy() || form.invalid">
+          {{ busy() ? 'Entrando…' : 'Entrar' }}
+        </button>
+      </form>
+    </section>
+  } @else {
+    <div class="page-heading">
+      <p class="eyebrow">Mesa de operações</p>
+      <h1>Cessão de crédito</h1>
+      <p>Precifique, confirme e acompanhe suas operações em um só lugar.</p>
+    </div>
+    <app-workspace />
+  }
+  @if (error()) {
+    <p role="alert" class="error">{{ error() }}</p>
+  }
 </main>
-<router-outlet />
+<footer>SRM Credit Engine · Operações em BRL e USD</footer>
