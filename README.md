@@ -4,15 +4,15 @@ Plataforma de cessão de crédito com backend Java/Spring Boot, frontend Angular
 
 ## Estado
 
-Blocos 2 a 4 implementados: cadastro/consulta, motor decimal, prazo, câmbio/simulação e liquidação BRL/USD transacional, idempotente e auditável, com credencial de banco restrita. O backend segue MVC com camadas concretas. C1/C2/C3 e integrações PostgreSQL passaram localmente; o frontend permanece no esqueleto.
+Blocos 2 a 5 implementados: cadastro/consulta, motor decimal, câmbio/simulação, liquidação idempotente/auditável e extrato SQL com filtros, paginação e totais por moeda, com credencial de banco restrita. O backend segue MVC com camadas concretas. C1/C2/C3 e integrações PostgreSQL passaram localmente; o frontend permanece no esqueleto.
 
-A CI executa testes, lint, build e cobertura do backend, com relatórios por 14 dias. Extrato e painel funcional serão implementados nos próximos blocos. A autenticação provisória usa uma conta externa do Spring Security e CSRF; APP_ROLES seleciona OPERATOR (padrão) ou ADMIN. A gestão cambial já exige ADMIN; contas separadas e fluxo próprio de sessão pertencem ao bloco 6.
+A CI executa testes, lint, build e cobertura do backend, com relatórios por 14 dias. O painel Angular funcional será implementado no bloco 6. A autenticação provisória usa uma conta externa do Spring Security e CSRF; APP_ROLES seleciona OPERATOR (padrão) ou ADMIN. A gestão cambial já exige ADMIN; contas separadas e fluxo próprio de sessão pertencem ao bloco 6.
 
 - [SPEC.md](SPEC.md): premissas, precisão, golden cases e critérios de aceite.
 - [DECISIONS.md](DECISIONS.md): decisões de arquitetura e cortes.
 - [AI_USAGE.md](AI_USAGE.md): colaboração com IA e evidências pendentes.
 - [Arquitetura MVC](docs/architecture.md): responsabilidades das camadas.
-- [Motor e prazo](docs/pricing.md), [câmbio e resiliência](docs/currency.md), [liquidação e retry](docs/settlements.md), [credenciais do banco](docs/database.md), [API](docs/api.md), [erros](docs/errors.md), [ER](docs/er.md) e [testes/cobertura](docs/quality.md).
+- [Motor e prazo](docs/pricing.md), [câmbio e resiliência](docs/currency.md), [liquidação e retry](docs/settlements.md), [extrato e planos SQL](docs/statements.md), [credenciais do banco](docs/database.md), [API](docs/api.md), [erros](docs/errors.md), [ER](docs/er.md) e [testes/cobertura](docs/quality.md).
 - [Proposta](openspec/changes/build-srm-credit-engine/proposal.md), [desenho](openspec/changes/build-srm-credit-engine/design.md) e [tasks](openspec/changes/build-srm-credit-engine/tasks.md).
 
 Java/Spring Boot oferece tipagem forte, transações e segurança; Angular organiza formulário, HTTP e estado tipados; PostgreSQL fornece precisão decimal, integridade referencial e transações ACID. Um monólito permite confirmar cada aquisição em uma única transação, sem coordenação entre serviços.
@@ -55,7 +55,7 @@ cd backend
 
 Se .env já existir, preserve o dono atual do banco e sua senha em MIGRATION_USER/MIGRATION_PASSWORD; defina DATABASE_USER=srm_app e outra DATABASE_PASSWORD para execução. Acrescente as configurações ausentes do exemplo sem sobrescrever credenciais ou apagar o volume. Execute db-bootstrap antes de reiniciar a API. [Atualização de volume existente](docs/database.md#volume-já-existente). Para outra porta PostgreSQL, ajuste POSTGRES_PORT e a porta em DATABASE_URL. O Spring Boot iniciado pelo Maven não carrega .env automaticamente; exportar as variáveis no mesmo terminal é necessário.
 
-Consulte [health](http://localhost:8080/actuator/health). O backend agora exige PostgreSQL e credenciais externas. Flyway aplica V1–V4 e Hibernate valida o schema; a conexão de negócio usa DATABASE_USER/DATABASE_PASSWORD e a migração usa MIGRATION_USER/MIGRATION_PASSWORD. O bootstrap cria o login restrito; V3/V4 adicionam auditoria e proteção do histórico. Nesta demonstração a API ainda recebe ambas as credenciais ao iniciar.
+Consulte [health](http://localhost:8080/actuator/health). O backend agora exige PostgreSQL e credenciais externas. Flyway aplica V1–V5 e Hibernate valida o schema; a conexão de negócio usa DATABASE_USER/DATABASE_PASSWORD e a migração usa MIGRATION_USER/MIGRATION_PASSWORD. O bootstrap cria o login restrito; V3/V4 adicionam auditoria e proteção do histórico. Nesta demonstração a API ainda recebe ambas as credenciais ao iniciar.
 
 [Swagger UI](http://localhost:8080/swagger-ui/index.html) e [OpenAPI JSON](http://localhost:8080/v3/api-docs) exigem autenticação. O formulário padrão em /login permite entrar com APP_USERNAME/APP_PASSWORD; HTTP Basic também está disponível. Mutações exigem token CSRF da sessão, inclusive quando usam Basic. [Contrato e limites desta etapa](docs/api.md).
 
@@ -97,6 +97,16 @@ Após perda de resposta, repita chave e corpo: status, JSON e Location originais
 
 O histórico é protegido pelo login restrito real; somente status/version e conclusão de reserva podem ser alterados. A espera por chave concorrente é limitada a 3 segundos; REQUEST_IN_PROGRESS inclui Retry-After: 1. [Protocolo, exemplos, respostas e limites](docs/settlements.md).
 
+## Consultar extrato
+
+GET /api/v1/settlements aceita from/to obrigatórios, assignorId e currency opcionais, page e size. O período UTC é [início, fim), limitado a 366 dias; filtra o instante da liquidação e a moeda de pagamento. Página inicial zero, tamanho padrão 20 e máximo 100, com ordem settledAt/id decrescente.
+
+Exemplo: /api/v1/settlements?from=2026-10-01T00:00:00Z&to=2026-11-01T00:00:00Z&page=0&size=20. A resposta inclui items, page, size, total e totalsByCurrency. Contagem e totais abrangem todo o filtro, mesmo em página vazia; BRL e USD ficam separados e os valores são strings decimais.
+
+Página, contagem e totais usam SQL parametrizado em uma transação read-only REPEATABLE READ própria. Inserção durante a leitura aparece somente na resposta seguinte; páginas de requisições distintas não mantêm um snapshot compartilhado. O histórico não usa câmbio atual nem recalcula preços.
+
+O teste StatementQueryPlanTest carrega 10000 títulos/5000 liquidações sintéticas em PostgreSQL descartável e gera EXPLAIN ANALYZE/BUFFERS das consultas reais. O relatório fica em backend/target/statement-query-plans.txt e também está [registrado em docs](docs/statement-query-plans.txt). A carga SQL não executa confirmação/idempotência nem mede latência HTTP. [Contrato, massa e reprodução](docs/statements.md).
+
 ## Verificações e CI
 
 No backend:
@@ -115,9 +125,9 @@ npm run lint
 npm run build
 ```
 
-O verify inclui Spotless, 164 testes, integração em PostgreSQL real por Testcontainers, JAR e critérios JaCoCo. Docker deve estar ativo: falha ao acessá-lo reprova a suíte, sem substituir o banco por H2. ESLint/Prettier e build estrito continuam no frontend; testes Angular acompanharão as funcionalidades do painel.
+O verify inclui Spotless, 190 testes, integração em PostgreSQL real por Testcontainers, JAR e critérios JaCoCo. Docker deve estar ativo: falha ao acessá-lo reprova a suíte, sem substituir o banco por H2. ESLint/Prettier e build estrito continuam no frontend; testes Angular acompanharão as funcionalidades do painel.
 
-O [workflow](.github/workflows/ci.yml) executa esses comandos, sem ignorar falhas obrigatórias, e publica Surefire/JaCoCo por 14 dias inclusive quando há falha e arquivos disponíveis. Cobertura mínima: backend 80% linhas/70% branches; cada classe financeira e strategy 95%/90%. A verificação local atual atingiu 96,52%/85,78% no geral, preservando todos os limites. [Resultados, critérios e teste negativo](docs/quality.md). A validação local não comprova execução remota do workflow desta branch. O [registro da estrutura inicial](docs/initial-validation.md) permanece como evidência daquela etapa.
+O [workflow](.github/workflows/ci.yml) executa esses comandos, sem ignorar falhas obrigatórias, e publica Surefire, planos SQL e JaCoCo por 14 dias inclusive quando há falha e arquivos disponíveis. Cobertura mínima: backend 80% linhas/70% branches; cada classe financeira e strategy 95%/90%. A verificação local atual atingiu 96,78%/86,97% no geral, preservando todos os limites. [Resultados, critérios e teste negativo](docs/quality.md). A validação local não comprova execução remota do workflow desta branch. O [registro da estrutura inicial](docs/initial-validation.md) permanece como evidência daquela etapa.
 
 ## Planejamento OpenSpec
 

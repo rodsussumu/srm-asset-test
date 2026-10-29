@@ -24,3 +24,9 @@ O [ER do cadastro](er.md) reflete a migration V1; será ampliado com as novas ta
 SettlementController delega a SettlementService, que valida a intenção e chama o proxy de SettlementTransactionService. Esse service abre uma transação nova para ler/controlar versão, reservar a chave, gravar auditoria e completar a resposta. JDBC e JPA compartilham a transação; a fachada só recebe o resultado após commit. O replay usa o JSON textual persistido para preservar bytes e Location. Detalhes em [liquidação](settlements.md).
 
 O login de negócio e o de migration são distintos; o [bootstrap e as permissões](database.md) acompanham as migrations. O [ER](er.md) agora cobre V1–V4. Controllers anteriores e o novo fluxo documentam erros como Problem Details; a consulta individual da liquidação declara a resposta 200 com SettlementResponse.
+
+## Extrato implementado
+
+GET /settlements passa pelo mesmo controller e delega a StatementService → StatementRepository, mantendo a separação MVC. O repository usa NamedParameterJdbcTemplate com predicados de fragmentos fixos e todos os valores parametrizados. O mapeamento de SettlementResponse reutiliza o snapshot existente; não depende do motor ou de cotação atual.
+
+O service abre uma transação read-only REQUIRES_NEW/REPEATABLE READ para página, contagem e totais. StatementQuery valida intervalo/paginação e calcula offset como long. Moedas são agregadas separadamente e valores saem como strings. A consistência vale para uma resposta; navegar entre páginas pode observar novas confirmações. [Detalhes](statements.md).

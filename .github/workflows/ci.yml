@@ -37,7 +37,9 @@ jobs:
         if: always()
         with:
           name: backend-test-results
-          path: backend/target/surefire-reports/
+          path: |
+            backend/target/surefire-reports/
+            backend/target/statement-query-plans.txt
           retention-days: 14
       - name: Publish backend coverage
         uses: actions/upload-artifact@v4

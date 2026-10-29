@@ -83,6 +83,6 @@ V3 cria liquidações únicas por recebível, snapshots financeiros e idempotên
 
 O resultado idempotente guarda JSON como TEXT, preservando os bytes e o status/Location originais. Reservas sem resultado só existem durante a transação; um constraint trigger diferido rejeita commit incompleto. V4 concede permissões ao papel srm_runtime e impede alteração/exclusão do histórico; somente completar uma reserva é permitido, com trigger que rejeita reescrita de confirmação. Detalhes em [credenciais](database.md).
 
-Verificação: `./mvnw -Dtest=ReceivablesIntegrationTest,SettlementSchemaTest,SettlementIntegrationTest test`. Inclui migrations em banco limpo, constraints, login restrito real, precisão, disputa da mesma versão, rollback e replay. Índices adicionais do extrato serão aferidos no bloco 5.
+Verificação: `./mvnw -Dtest=ReceivablesIntegrationTest,SettlementSchemaTest,SettlementIntegrationTest test`. Inclui migrations em banco limpo, constraints, login restrito real, precisão, disputa da mesma versão, rollback e replay. V5 adiciona índices de extrato por instante/id, cedente/instante/id e moeda/instante/id. Os planos foram aferidos na massa sintética, sem mudar as tabelas ou o histórico: [consultas e evidência](statements.md).
 
 A FK settlement_id da idempotência não possui UNIQUE: o banco admite múltiplos registros apontando para a mesma liquidação. O protocolo normal cria um resultado por intenção confirmada; o diagrama não impõe uma cardinalidade 1:1 inexistente no schema.

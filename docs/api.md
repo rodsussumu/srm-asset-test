@@ -1,4 +1,4 @@
-# API implementada nos blocos 2 a 4
+# API implementada nos blocos 2 a 5
 
 Base: `/api/v1`. As rotas abaixo exigem autenticação. O frontend ainda é o esqueleto; o painel de operação será implementado no bloco 6.
 
@@ -18,6 +18,7 @@ Base: `/api/v1`. As rotas abaixo exigem autenticação. O frontend ainda é o es
 | POST `/pricing/simulations` | Simulação indicativa sem persistência financeira; 200 ou 503 em USD sem câmbio válido. |
 | POST `/settlements` | Confirma com recálculo e Idempotency-Key UUID; 201/Location inclusive no replay exato. |
 | GET `/settlements/{id}` | Snapshot original de auditoria; 200 ou 404. |
+| GET `/settlements?from=...&to=...&assignorId=...&currency=USD&page=0&size=20` | Extrato histórico; período obrigatório, cedente/moeda opcionais, totais por moeda para todo o filtro. |
 
 Listagens retornam `{items, page, size, total}`. Tamanho entre 1 e 100, padrão 20. Cedentes e recebíveis usam createdAt/id decrescentes; câmbio usa effectiveAt/id decrescentes. Página sem registros retorna 200 e lista vazia.
 
@@ -85,7 +86,7 @@ No diretório backend, com Java 21 e Docker ativos:
 
 `ReceivablesIntegrationTest` exercita HTTP via MockMvc com PostgreSQL descartável real: cadastro, consulta, paginação, precisão, validação de entrada, autenticação, CSRF, erros e OpenAPI. Não usa H2 e não altera o banco do Compose.
 
-`FxIntegrationTest` acrescenta histórico/constraints, seleção temporal, controle ADMIN, sincronização repetida e simulação de C1–C3 sem gravações. `FxProviderClientTest` afere retries e timeouts com HTTP real. `SettlementSchemaTest` e `SettlementIntegrationTest` verificam permissões reais, confirmação de C1–C3, replay, conflitos, concorrência com barreira, rollback e perda de resposta após commit. O extrato de liquidações pertence ao bloco 5.
+`FxIntegrationTest` acrescenta câmbio/simulação; `FxProviderClientTest`, retries/timeouts HTTP. `SettlementSchemaTest` e `SettlementIntegrationTest` verificam permissões, confirmação de C1–C3, replay, conflitos, concorrência, rollback e perda de resposta. `StatementIntegrationTest` cobre filtros, paginação, snapshots, totais e inserção concorrente; `StatementQueryPlanTest` gera massa e planos reais.
 
 ## Liquidação
 
@@ -94,3 +95,9 @@ No diretório backend, com Java 21 e Docker ativos:
 Retry com mesma chave e conteúdo normalizado devolve exatamente 201/corpo/Location originais, antes de consultar recebível/câmbio. Mesma chave com outro conteúdo gera IDEMPOTENCY_KEY_REUSED. Preço/UUID de cotação diferentes geram PRICE_CHANGED, exigindo nova simulação e confirmação. Título já liquidado ou disputa perdida gera RECEIVABLE_ALREADY_SETTLED. Espera pela mesma chave é limitada a 3 segundos; REQUEST_IN_PROGRESS retorna Retry-After: 1. Todos esses conflitos usam 409. Falha inesperada de persistência ou commit retorna 500 e desfaz todas as gravações. Em USD, falta de cotação local válida retorna 503.
 
 `GET /settlements/{id}` não recalcula e preserva o histórico após novas cotações ou alteração do nome do cedente. Não há endpoints de alteração/exclusão de auditoria. Exemplos, retenção e semântica completa em [liquidação e retry](settlements.md); configuração de banco em [credenciais](database.md).
+
+## Extrato
+
+GET `/settlements` exige from/to como instantes com fuso em intervalo `[from,to)` de até 366 dias. Filtros opcionais assignorId UUID e currency BRL/USD; page a partir de zero, size padrão 20 e máximo 100. A resposta contém `{items,page,size,total,totalsByCurrency}`. Itens são snapshots SettlementResponse; totais têm `{currency,count,paymentTotal}` com valor decimal como string para todo o filtro, independente da página. Moedas sem registros são omitidas; página além da última permanece 200 e mantém contagem/totais.
+
+Ordem fixa settledAt/id decrescente, sem parâmetro de ordenação SQL. Página/contagem/totais usam um único snapshot read-only REPEATABLE READ. Novas requisições podem ver novas confirmações. Entradas inválidas retornam 400 com campos e correlação. [Contrato detalhado, índices, massa e EXPLAIN ANALYZE](statements.md).

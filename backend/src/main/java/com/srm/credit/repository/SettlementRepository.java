@@ -61,7 +61,7 @@ public class SettlementRepository {
         .findFirst();
   }
 
-  private static Settlement read(ResultSet rs) throws SQLException {
+  static Settlement read(ResultSet rs) throws SQLException {
     return new Settlement(
         rs.getObject("id", UUID.class),
         rs.getObject("receivable_id", UUID.class),
