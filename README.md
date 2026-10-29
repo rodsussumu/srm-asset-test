@@ -97,7 +97,7 @@ npm test -- --reporters=default --reporters=junit --output-file=test-results.xml
 npm run build
 ```
 
-A [CI](.github/workflows/ci.yml) executa esses checks em PRs e pushes na `main`. O backend usa PostgreSQL real via Testcontainers. JaCoCo exige 80% de linhas/70% de branches no geral e 95%/90% por classe financeira ou estratégia. Relatórios de testes e cobertura ficam disponíveis por 14 dias. [Detalhes da qualidade](docs/quality.md).
+A [CI](.github/workflows/ci.yml) executa esses checks em PRs e pushes na `main`. O backend usa PostgreSQL real via Testcontainers. JaCoCo exige 80% de linhas/70% de branches no geral e 95%/90% por classe financeira ou estratégia. Relatórios de testes e cobertura ficam disponíveis por 14 dias. [Detalhes da qualidade](docs/quality.md) e [execução remota verificada](docs/ci.md).
 
 ## Resultados da validação
 

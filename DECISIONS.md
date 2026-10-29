@@ -30,7 +30,7 @@ GitHub Flow: branches curtas por funcionalidade e integração por pull requests
 
 Blocos 2 a 8 implementados e validados localmente. A CI evoluiu com as funcionalidades: testes/cobertura backend foram antecipados para 2.6 por decisão do autor; npm test entrou no bloco 6 e os relatórios Angular no bloco 7. A validação atual inclui PostgreSQL real com login restrito, golden cases, transações concorrentes e falhas de persistência/commit. Não se usa H2 ou exclusões de produção para cumprir limites. [Evidências por etapa](docs/quality.md).
 
-Operação usa Compose completo e credenciais SQL distintas. A API ainda recebe o segredo de migração ao iniciar; isso não isola um processo comprometido. Smoke final e p95 HTTP foram aferidos no bloco 8, com roteiro de walkthrough preparado. Resultados locais não comprovam execução remota do CI desta branch.
+Operação usa Compose completo e credenciais SQL distintas. A API ainda recebe o segredo de migração ao iniciar; isso não isola um processo comprometido. Smoke final e p95 HTTP foram aferidos no bloco 8, com roteiro de walkthrough preparado. A execução remota da PR #10 foi verificada e aprovada; veja [evidência e configuração da CI](docs/ci.md).
 
 ## Câmbio e simulação — bloco 3
 
@@ -64,7 +64,7 @@ Filtros opcionais são fragmentos fixos e valores são vinculados por parâmetro
 
 V5 adiciona três índices iniciais. O teste de planos executa as mesmas strings do repository com papel restrito em PostgreSQL descartável, após carga idempotente de 10000 recebíveis/5000 liquidações e VACUUM ANALYZE. Mantivemos os índices sem forçar o planejador ou criar um índice combinado sem evidência. Contagens e totais amplos ainda percorrem todo o filtro; offset alto pode custar mais. O fixture SQL não executa a API de confirmação nem resultados idempotentes e não comprova throughput financeiro ou p95 HTTP.
 
-Resultado atual: 190 testes, cobertura geral 96,78% linhas/86,97% branches, preservando todos os mínimos. A CI inclui o relatório de planos nos artefatos de testes. O painel foi concluído no bloco 6; a aferição HTTP do bloco 8 foi registrada com seus limites locais. A execução remota da branch atual ainda não foi verificada. [Planos e método](docs/statements.md).
+Resultado atual: 190 testes, cobertura geral 96,78% linhas/86,97% branches, preservando todos os mínimos. A CI inclui o relatório de planos nos artefatos de testes. O painel foi concluído no bloco 6; a aferição HTTP do bloco 8 foi registrada com seus limites locais. Na conclusão do bloco 5, a execução remota ainda não havia sido verificada; o estado consolidado está em [CI](docs/ci.md). [Planos e método](docs/statements.md).
 
 ## Sessão e painel — bloco 6
 
@@ -88,10 +88,14 @@ Smoke e benchmark usam volumes distintos: smoke cria registros por API/SPA, e a 
 
 O exemplo de extensão é uma strategy alternativa somente em teste, preservando API/schema e fórmula de produção. Um tipo novo real exige enum, registro da strategy, nova migration das CHECKs, contrato/frontend e novos casos de aceite. [Roteiro e comandos](docs/walkthrough.md).
 
-A matriz relaciona 32 requisitos/59 cenários a testes/documentos, com nomes e links conferidos. Os 39 itens de implementação estão concluídos localmente; a aprovação de negócio, revisão humana final, CI remota/artefatos, convites e defesa não foram presumidos. O projeto continua sem transferência bancária ou garantias de produção além do recorte testado.
+A matriz relaciona 32 requisitos/59 cenários a testes/documentos, com nomes e links conferidos. Os 39 itens de implementação estão concluídos localmente; a aprovação de negócio, revisão humana final, convites e defesa não foram presumidos. A CI remota e a publicação dos três artefatos foram verificadas posteriormente na PR #10. O projeto continua sem transferência bancária ou garantias de produção além do recorte testado.
 
 ## Cenário restrito de desempenho — decisão posterior à referência
 
 O autor escolheu orçamento para todo o conjunto (não apenas API) e 100 mil medidas totais, 50 mil por rota. Mantivemos a referência anterior e criamos override de Compose: API 1,25 CPU/2 GiB, PostgreSQL 0,5 CPU/1,5 GiB, nginx 0,15 CPU/256 MiB e mock 0,1 CPU/256 MiB, sem swap adicional. Cotas fixas por serviço somam 2 CPUs/4 GiB, sem prometer equivalência a uma VM que permita compartilhar capacidade ociosa.
 
 A primeira tentativa foi comprometida por suspensão do host e preservada com falhas. Após recriar o banco, inibir temporariamente suspensão por inatividade e limitar o driver a 900 s, a segunda concluiu 100 mil respostas válidas sem erro, p95 60,923/94,195 ms e sem OOM/reinício. Não foram alteradas queries/aplicação para selecionar resultado favorável. O coletor omitia backend por controles ANSI; a lacuna foi registrada, o parser corrigido e conferido por replay, sem refazer a carga para ocultá-la. Contadores cgroup antes/depois cobrem os quatro serviços. [Relatório e limites](docs/performance-constrained.md).
+
+## Manutenção da CI
+
+Runner fixado em Ubuntu 24.04 para evitar mudança implícita de sistema operacional. Checkout v5, setup-java v5, setup-node v5 e upload-artifact v6 usam Node 24 internamente; isso não altera Java 21 ou Node 22 do projeto. Os testes unitários Angular/Vitest já eram obrigatórios antes do build e continuam com JUnit publicado por 14 dias. [Estado e fontes](docs/ci.md).

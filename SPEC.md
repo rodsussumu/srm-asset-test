@@ -1,6 +1,6 @@
 # SRM Credit Engine — especificação
 
-**Estado:** premissas definidas antes do código; blocos 2 a 8 implementados e validados localmente, incluindo smoke BRL/USD, aferição HTTP e roteiro de defesa. CI remota, aceite comercial e defesa humana não foram aferidos. Stack: Java/Spring Boot, Angular e PostgreSQL. Cenários detalhados nas [seis specs](openspec/changes/build-srm-credit-engine/specs/).
+**Estado:** premissas definidas antes do código; blocos 2 a 8 implementados e validados localmente, incluindo smoke BRL/USD, aferição HTTP e roteiro de defesa. CI remota aprovada na [execução da PR #10](https://github.com/rodsussumu/srm-asset-test/actions/runs/40931500284); aceite comercial e defesa humana não foram aferidos. Stack: Java/Spring Boot, Angular e PostgreSQL. Cenários detalhados nas [seis specs](openspec/changes/build-srm-credit-engine/specs/).
 
 ## Escopo e premissas
 

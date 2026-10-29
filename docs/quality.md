@@ -1,5 +1,9 @@
 # Testes, cobertura e CI
 
+## Estado consolidado
+
+198 testes backend e 48 Angular aprovados localmente. A CI remota da PR #10 também passou em backend/frontend e publicou três artefatos; [execução, limites e configuração](ci.md). As seções por bloco abaixo preservam o histórico: pendências e contagens de cada etapa não representam o estado atual. A atualização local das Actions ainda precisa de execução no GitHub.
+
 ## Organização dos testes Java
 
 Os testes em `backend/src/test/java/com/srm/credit` espelham os pacotes da aplicação: `config`, `controller`, `service`, `model` e `repository`. Testes que verificam várias camadas ou o schema real ficam em `integration`; auxiliares compartilhados ficam em `support`. Os nomes das classes de teste foram preservados, inclusive para execução seletiva com `-Dtest`.
