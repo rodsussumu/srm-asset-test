@@ -1,22 +1,12 @@
 # SRM Credit Engine
 
-Plataforma de cessão de crédito com Java/Spring Boot MVC, Angular e PostgreSQL. Cadastra recebíveis em BRL, simula preços e registra aquisições com pagamento BRL/USD, histórico imutável, idempotência e controle otimista de concorrência.
+Plataforma de cessão de crédito com Java/Spring Boot MVC, Angular e PostgreSQL. Permite cadastrar cedentes e recebíveis em BRL, simular preços, confirmar aquisições com pagamento em BRL/USD e consultar o extrato com totais por moeda.
 
-## Estado e documentos
+As operações usam precisão decimal, histórico imutável, idempotência e controle de concorrência. As premissas financeiras, os golden cases e os critérios de aceite estão na [SPEC](SPEC.md).
 
-Blocos 2 a 8 implementados e validados localmente: motor decimal, cadastro, câmbio, liquidação, extrato, sessão/painel, observabilidade e Compose completo. São 198 testes backend e 48 Angular, smoke final BRL/USD e aferição HTTP. Execução local não comprova CI/deploy remotos ou defesa humana realizada.
+## Execução rápida
 
-- [SPEC](SPEC.md): premissas, precisão, golden cases e critérios de aceite.
-- [DECISIONS](DECISIONS.md): escolhas e cortes; [REVIEW](REVIEW.md): análise priorizada do Anexo A; [AI_USAGE](AI_USAGE.md): colaboração, erro real detectado e limites de autoria.
-- [Arquitetura MVC](docs/architecture.md), [ER](docs/er.md) e [C4 níveis 1 e 2](docs/c4.md).
-- [Motor/prazo](docs/pricing.md), [câmbio](docs/currency.md), [liquidação/retry](docs/settlements.md) e [extrato/planos SQL](docs/statements.md).
-- [Sessão](docs/authentication.md), [painel](docs/workspace.md), [API](docs/api.md), [erros](docs/errors.md) e [credenciais do banco](docs/database.md).
-- [Operação/diagnóstico](docs/operations.md), [observabilidade](docs/observability.md) e [testes/cobertura](docs/quality.md).
-- [Smoke final](docs/smoke.md), [aferição HTTP](docs/performance.md), [matriz de rastreabilidade](docs/traceability.md) e [roteiro de defesa de 10 minutos](docs/walkthrough.md).
-
-## Rodar com Docker Compose
-
-Requer Docker com Compose v2. Maven, Java e Node do host não são necessários para construir as imagens.
+Requer Docker com Compose v2. Java, Maven e Node do host não são necessários para construir e executar as imagens.
 
 ```sh
 cp .env.example .env
@@ -25,43 +15,50 @@ docker compose up --build -d --wait
 docker compose ps -a
 ```
 
-Abra [localhost:4200](http://localhost:4200). Entre com APP_USERNAME/APP_PASSWORD (OPERATOR) ou ADMIN_USERNAME/ADMIN_PASSWORD (ADMIN, também operador). Use nomes distintos e senhas de pelo menos 12 caracteres. COOKIE_SECURE=false serve apenas HTTP local; HTTPS exige terminação TLS e COOKIE_SECURE=true.
+Abra [localhost:4200](http://localhost:4200), considerando a porta padrão. As credenciais são definidas no `.env`:
 
-O Compose sobe PostgreSQL, bootstrap do login restrito, API, nginx com bundle Angular e mock de câmbio. Flyway aplica V1–V5; a aplicação usa DATABASE_USER/DATABASE_PASSWORD, enquanto migrações usam MIGRATION_USER/MIGRATION_PASSWORD. Bootstrap termina antes da API; nginx espera readiness. As portas publicadas ficam em loopback e são configuráveis por POSTGRES_PORT, BACKEND_PORT, FRONTEND_PORT e FX_MOCK_PORT.
+| Papel | Usuário | Senha | Permissões |
+|---|---|---|---|
+| OPERATOR | `APP_USERNAME` | `APP_PASSWORD` | Cadastro, simulação, liquidação e consulta |
+| ADMIN | `ADMIN_USERNAME` | `ADMIN_PASSWORD` | Operações do painel e gestão de câmbio |
 
-Se já existe .env/volume, preserve o usuário/senha atuais do dono do banco em MIGRATION_USER/MIGRATION_PASSWORD, acrescente as variáveis ausentes do exemplo e mantenha outra credencial para srm_app. [Atualização sem apagar dados](docs/database.md#volume-já-existente). Não sobrescreva o arquivo real com o exemplo. `docker compose down` preserva dados; `down --volumes` apaga o histórico e só deve ser usado em projeto descartável.
+Use usuários distintos e senhas com pelo menos 12 caracteres. `COOKIE_SECURE=false` atende HTTP local; em HTTPS, configure terminação TLS e `COOKIE_SECURE=true`.
 
-## Percorrer a operação
+O Compose inicia PostgreSQL, bootstrap da credencial restrita, API, nginx com Angular e mock de câmbio. Flyway aplica as migrations automaticamente. As portas ficam em loopback e podem ser ajustadas no `.env`.
 
-1. Cadastre ou selecione um cedente. Preencha face em formato brasileiro, vencimento de 1 a 1080 dias, tipo DUPLICATA/CHEQUE e moeda BRL/USD.
-2. Aguarde a simulação indicativa (300 ms após a última alteração válida). O painel mostra VP/deságio em BRL, pagamento, meses, base/spread, política e cotação quando USD.
-3. Cadastre o recebível e confirme explicitamente a liquidação após a nova simulação dos dados persistidos. O servidor recalcula e só responde sucesso após commit.
-4. Consulte recebíveis e extrato, com filtros remotos, paginação e totais separados por moeda. Depois de uma resposta perdida/recarga, verifique o estado antes de uma nova intenção.
+`docker compose down` preserva os dados. A opção `--volumes` apaga o banco. Para um ambiente já existente, siga a [atualização sem apagar dados](docs/database.md#volume-já-existente), preservando as credenciais atuais de migração.
 
-Para habilitar USD, entre como ADMIN e use **Sincronizar cotação**. O mock fornece 5.4321 BRL por USD, com vigência fixada ao iniciar; não é dado de mercado. A sincronização é explícita. Após 24 horas, reinicie o mock e sincronize novamente. BRL não depende de câmbio; USD utiliza cotação local válida, sem chamada remota durante a liquidação. Sem cotação válida retorna 503 FX_RATE_UNAVAILABLE. [Limites de timeout/retry](docs/currency.md).
+## Fluxo de uso
 
-A confirmação usa Idempotency-Key UUID por ator/rota/intenção e hash do corpo. Retry preserva chave e corpo para recuperar status/JSON/Location originais; não recalcula nem cria outra liquidação. PRICE_CHANGED exige novo preço e aceite. Duas intenções para o mesmo título produzem um sucesso e um conflito, protegidos por @Version e UNIQUE(receivable_id). Não há transferência bancária, saldo ou edição/exclusão de liquidação.
+1. Entre no painel e cadastre ou selecione um cedente.
+2. Informe o valor de face em formato brasileiro, vencimento de 1 a 1080 dias, tipo `DUPLICATA`/`CHEQUE` e moeda de pagamento `BRL`/`USD`.
+3. Confira a simulação: VP e deságio em BRL, pagamento, prazo, taxas e cotação quando aplicável.
+4. Cadastre o recebível, revise a simulação dos dados persistidos e confirme a liquidação. O servidor recalcula o preço antes de concluir.
+5. Consulte recebíveis e extrato, com filtros, paginação e totais separados por moeda.
 
-## Diagnóstico e contrato
+Para operar em USD, entre como ADMIN e use **Sincronizar cotação**. O mock fornece `5.4321` BRL por USD, com vigência fixada ao iniciar. Após 24 horas, reinicie o mock e sincronize novamente. BRL funciona sem cotação; USD exige cotação local válida. [Política de câmbio](docs/currency.md).
 
-[Readiness](http://localhost:4200/actuator/health/readiness), [liveness](http://localhost:4200/actuator/health/liveness) e [health estático](http://localhost:4200/health) são públicos, sem detalhes internos. Banco fora resulta em readiness 503; o health estático do nginx não comprova disponibilidade SQL. A API não depende da saúde do mock para confirmar BRL/USD com cotação local válida.
+Retries de confirmação preservam a mesma chave e corpo para recuperar o resultado original. Mudança de preço exige novo aceite; intenções concorrentes para o mesmo título resultam em um sucesso e um conflito. Após perda de resposta ou recarga, consulte o estado antes de iniciar outra intenção. [Liquidação e idempotência](docs/settlements.md).
 
-Após login no painel, a mesma sessão permite abrir [Swagger UI](http://localhost:4200/swagger-ui/index.html), [OpenAPI JSON](http://localhost:4200/v3/api-docs) e [métricas](http://localhost:4200/actuator/metrics). Login/logout e todas as mutações exigem CSRF; [protocolo para clientes HTTP](docs/authentication.md). Não há HTTP Basic.
+## Estrutura e arquitetura
 
-Logs JSON trazem timestamp UTC, evento, resultado e correlação. `settlements.confirmed` conta uma confirmação por moeda após commit; replay/rollback não incrementam. `pricing.duration` mede apenas o motor, não latência HTTP. Métricas são memória e não substituem o extrato SQL. [Consultas e limites](docs/observability.md).
-
-```sh
-docker compose logs --tail=100 backend
-curl --fail http://localhost:4200/actuator/health/readiness
+```text
+backend/     API Spring Boot, migrations e testes Java
+frontend/    Painel Angular e testes de interface
+scripts/     Verificação operacional e carga HTTP
+docs/        Arquitetura, contratos, operação e evidências
+openspec/    Proposta, especificações e tarefas
 ```
 
-O [script operacional](scripts/verify-compose.py) verifica proxy, sessão, credencial SQL real, provedor parado, C1/C3, replay, métricas/logs e banco indisponível. Ele cria dados sintéticos e para/restaura dependências: execute apenas em projeto descartável com portas próprias, conforme [instruções](docs/operations.md).
+O backend segue MVC com controllers, services, repositories, DTOs e model financeiro independente da infraestrutura. Java usa `BigDecimal` e estratégias de spread; PostgreSQL fornece `NUMERIC`, constraints e transações. Liquidação, snapshot e resposta idempotente são persistidos atomicamente. Angular separa apresentação, acesso à API e estado.
+
+Consulte a [arquitetura](docs/architecture.md), o [diagrama ER](docs/er.md), os [diagramas C4](docs/c4.md) e as [decisões técnicas](DECISIONS.md).
 
 ## Desenvolvimento e testes
 
-Versões fixadas: Java 21, Spring Boot 3.5.16, Angular 21.2.0, Node 22.16.0, TypeScript 5.9.2 e PostgreSQL 17.11. [Compatibilidade e referências](docs/versions.md). Com nvm, execute nvm use na raiz; ajuste JAVA_HOME para Java 21.
+Versões fixadas: Java 21, Spring Boot 3.5.16, Angular 21.2.0, Node 22.16.0, TypeScript 5.9.2 e PostgreSQL 17.11. Use `nvm use` na raiz e configure `JAVA_HOME` para Java 21. [Compatibilidade](docs/versions.md).
 
-Para executar API/Angular no host: inicie postgres/bootstrap/fx-mock com Compose, exporte as variáveis do .env confiável no mesmo terminal e use os comandos abaixo. O proxy Angular aponta para localhost:8080; ajuste proxy.conf.json se mudar a porta da API.
+Para executar a API no host, inicie as dependências e carregue as variáveis do seu `.env`:
 
 ```sh
 docker compose up -d --wait postgres fx-mock
@@ -73,7 +70,7 @@ cd backend
 ./mvnw spring-boot:run
 ```
 
-Em outro terminal:
+Em outro terminal, inicie o frontend:
 
 ```sh
 cd frontend
@@ -81,15 +78,17 @@ npm ci
 npm start
 ```
 
-Validação backend (Java 21 e Docker ativos), dentro de backend:
+O proxy Angular aponta para `localhost:8080`. Se alterar as portas do PostgreSQL ou do mock, ajuste também `DATABASE_URL` e `FX_PROVIDER_URL` para a execução no host; para a API, ajuste `frontend/proxy.conf.json`.
+
+Execute a validação backend dentro de `backend`, com Java 21 e Docker ativos:
 
 ```sh
 ./mvnw -B -ntp clean verify
-# Corrigir formatação, se necessário:
+# Para corrigir formatação:
 ./mvnw spotless:apply
 ```
 
-Validação Angular, dentro de frontend:
+Execute a validação frontend dentro de `frontend`:
 
 ```sh
 npm ci
@@ -98,36 +97,44 @@ npm test -- --reporters=default --reporters=junit --output-file=test-results.xml
 npm run build
 ```
 
-A [CI](.github/workflows/ci.yml) roda esses checks em PRs/pushes na main. Backend usa PostgreSQL real por Testcontainers: golden cases, migrations, permissões, rollback e concorrência, sem H2 ou skips por ausência de Docker. JaCoCo exige 80% linhas/70% branches no geral e 95%/90% por classe financeira/strategy. Relatórios Surefire/JaCoCo, planos SQL e JUnit Angular são publicados por 14 dias, inclusive após falhas quando disponíveis; publicação não torna o job aprovado. Falhas obrigatórias não são ignoradas. [Resultados e limites](docs/quality.md).
+A [CI](.github/workflows/ci.yml) executa esses checks em PRs e pushes na `main`. O backend usa PostgreSQL real via Testcontainers. JaCoCo exige 80% de linhas/70% de branches no geral e 95%/90% por classe financeira ou estratégia. Relatórios de testes e cobertura ficam disponíveis por 14 dias. [Detalhes da qualidade](docs/quality.md).
 
-Imagens compilam artefatos; o builder backend usa -DskipTests package porque não tem Docker para Testcontainers. Isso não substitui clean verify na CI. O bundle Angular usa npm ci e build estrito. Os runtimes não carregam Maven/Node ou testes.
+## Resultados da validação
 
-## Arquitetura e versionamento
+Execuções locais em 29/10/2026:
 
-Java/Spring Boot reúne tipagem, transações e segurança; Angular separa apresentação/API/estado; PostgreSQL oferece NUMERIC, constraints e atomicidade. O monólito MVC permite confirmar estado, snapshot e resultado idempotente na mesma transação. O model financeiro usa BigDecimal/strategies sem infraestrutura. O extrato usa SQL parametrizado com três consultas no mesmo snapshot REPEATABLE READ por resposta; páginas distintas podem observar novos commits. [Decisões e cortes](DECISIONS.md).
+| Verificação | Resultado | Evidência |
+|---|---|---|
+| Backend | 198 testes, sem falhas, erros ou skips | [Testes e cobertura](docs/quality.md) |
+| Cobertura Java | 97,12% de linhas e 86,26% de branches; gates aprovados | [Resumo](docs/evidence/quality-summary.txt) |
+| Frontend | 48 testes, lint e build aprovados | [Testes e cobertura](docs/quality.md) |
+| Fluxo completo | BRL/USD, sessão, replay, métricas e falhas de dependências; operação pelo Angular | [Smoke](docs/smoke.md) |
+| Carga de referência | 1.000 requisições por rota; p95 de 16,628 ms na simulação e 17,311 ms no extrato | [Método e resultados](docs/performance.md) |
+| Carga com 2 CPUs/4 GiB agregados | 100.000 requisições, 50.000 por rota; zero erros; p95 de 60,923 ms na simulação e 94,195 ms no extrato | [Método, cotas e limites](docs/performance-constrained.md) |
 
-GitHub Flow: branch curta por funcionalidade a partir da main, Conventional Commits em inglês e integração por PR. Isso mantém uma mudança revisável por etapa sem branches permanentes adicionais. Cada PR explica problema, decisão e validação conforme o [template](.github/pull_request_template.md). Proteção de branch, aprovação externa e convites não são presumidos nem configurados pela aplicação.
+As medições usaram dez clientes e atenderam aos alvos de p95 de 300 ms para simulação e 500 ms para extrato. São testes locais com dados sintéticos e aquecimento. O perfil restrito usa cotas por serviço cuja soma é 2 CPUs/4 GiB; gerador e host ficam fora desse orçamento. O relatório preserva a tentativa interrompida e descreve as limitações da coleta. Os resultados não representam SLA de produção.
 
-## Planejamento OpenSpec
+A [matriz de rastreabilidade](docs/traceability.md) relaciona 32 requisitos e 60 cenários aos testes e às evidências. O [roteiro de demonstração](docs/walkthrough.md) cobre golden cases, concorrência e extensão de estratégia.
+
+## API e operação
+
+Após login no painel, a mesma sessão permite acessar [Swagger UI](http://localhost:4200/swagger-ui/index.html), [OpenAPI JSON](http://localhost:4200/v3/api-docs) e [métricas](http://localhost:4200/actuator/metrics). Clientes HTTP devem seguir o [protocolo de sessão e CSRF](docs/authentication.md).
 
 ```sh
-openspec status --change build-srm-credit-engine
-openspec instructions apply --change build-srm-credit-engine --json
-openspec validate build-srm-credit-engine --strict
+docker compose logs --tail=100 backend
+curl --fail http://localhost:4200/actuator/health/readiness
 ```
 
-[Proposta](openspec/changes/build-srm-credit-engine/proposal.md), [desenho](openspec/changes/build-srm-credit-engine/design.md), [tasks](openspec/changes/build-srm-credit-engine/tasks.md) e [seis specs](openspec/changes/build-srm-credit-engine/specs/). Os 39 itens foram concluídos localmente. Revise a entrega e solicite arquivamento OpenSpec quando apropriado; publicação da PR e defesa são passos separados.
+Readiness verifica a disponibilidade do banco; liveness permanece independente dele. Logs JSON incluem timestamp UTC e correlação. O [guia operacional](docs/operations.md) reúne diagnóstico e instruções do script de smoke, que deve ser usado em ambiente descartável porque cria dados e interrompe dependências.
 
-## Validação final local
+## Documentação
 
-Em 29/10/2026, 10 clientes com sessões independentes executaram 200 requisições de aquecimento e 1000 medidas por rota pelo nginx, com 10000 títulos/5000 liquidações. Sem erros: p95 16,628 ms na simulação (alvo 300 ms) e 17,311 ms no extrato (alvo 500 ms). O CSV de 2000 amostras foi auditado; host M2/8 CPUs/24 GiB, Docker com 8 CPUs e cerca de 11,7 GiB. É medição local curta e aquecida, sem representar capacidade/SLA de produção. [Método, reprodução e limites](docs/performance.md).
+| Tema | Referências |
+|---|---|
+| Requisitos e planejamento | [SPEC](SPEC.md), [proposta](openspec/changes/build-srm-credit-engine/proposal.md), [desenho](openspec/changes/build-srm-credit-engine/design.md), [tarefas](openspec/changes/build-srm-credit-engine/tasks.md) |
+| Regras de negócio | [Motor e prazo](docs/pricing.md), [câmbio](docs/currency.md), [liquidação](docs/settlements.md), [extrato](docs/statements.md) |
+| Contratos e segurança | [API](docs/api.md), [erros](docs/errors.md), [sessão](docs/authentication.md), [credenciais e permissões SQL](docs/database.md) |
+| Interface e operação | [Painel](docs/workspace.md), [operação](docs/operations.md), [observabilidade](docs/observability.md) |
+| Revisão e autoria | [Análise do Anexo A](REVIEW.md), [uso de IA](AI_USAGE.md) |
 
-O [smoke](docs/smoke.md) criou registros BRL/USD via HTTP em outro volume limpo, verificou replays e dependências, e confirmou uma nova operação USD pelo Angular no Chrome. O teste StrategyExtensionTest e o roteiro demonstram a extensão do spread sem duplicar fórmula; não foi introduzido um terceiro tipo em produção. A matriz cobre 32 requisitos e 60 cenários das seis specs, com limites remotos/humanos explícitos.
-
-Os arquivos selecionados em docs/evidence são evidências intencionais da validação. Artefatos de build, dependências, logs, .env, relatórios temporários e caches Python ficam no .gitignore. O gitignore não retira arquivos já rastreados automaticamente; a auditoria não encontrou arquivos rastreados abrangidos pelas regras atuais.
-
-## Cenário adicional: 2 CPUs/4 GiB e 100 mil requisições
-
-O autor escolheu reduzir o orçamento agregado dos quatro serviços e medir 50 mil requisições por rota com dez clientes. O perfil compose.benchmark.yaml limita backend, PostgreSQL, nginx e mock a uma soma de 2 CPUs/4 GiB. A tentativa contínua concluiu 100 mil HTTP 200, sem erros: p95 60,923 ms na simulação e 94,195 ms no extrato. Sem OOM/reinícios; houve throttling de CPU. A referência original foi preservada.
-
-Uma primeira tentativa atravessou suspensões do host, teve timeouts/401 e foi mantida como execução interrompida, não como comparação válida. O relatório também explicita a omissão do backend nas amostras contínuas pelo parser original, sua correção e os contadores cgroup disponíveis para todos os serviços. [Método, cotas, resultados, falhas e reprodução](docs/performance-constrained.md). As cotas não equivalem a uma VM exclusiva e o resultado não representa capacidade de produção.
+O projeto usa GitHub Flow, Conventional Commits em inglês e PRs conforme o [template](.github/pull_request_template.md). As especificações OpenSpec podem ser verificadas com `openspec validate build-srm-credit-engine --strict`.
