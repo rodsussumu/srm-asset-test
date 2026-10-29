@@ -14,6 +14,7 @@ Versões fixadas para a estrutura inicial:
 | PostgreSQL | 17.11-alpine | compose.yaml e Testcontainers |
 | Springdoc OpenAPI | 2.8.17 | backend/pom.xml |
 | JaCoCo | 0.8.16 | backend/pom.xml |
+| Mock cambial | Python 3.13-alpine, stdlib | infra/fx-mock/Dockerfile |
 
 As dependências diretas do frontend têm versões exatas; npm ci usa o lockfile. O backend herda versões gerenciadas do parent Spring Boot fixado; o Wrapper fixa a distribuição Maven. Java fixa a linha LTS, não um patch específico do JDK. O tag da imagem fixa o patch PostgreSQL, não o digest da imagem.
 

@@ -3,6 +3,7 @@ package com.srm.credit.config;
 import com.srm.credit.exception.ErrorResponses;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -29,6 +30,8 @@ public class SecurityConfig {
             auth ->
                 auth.requestMatchers("/actuator/health", "/actuator/health/**")
                     .permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/v1/fx-rates", "/api/v1/fx-rates/sync")
+                    .hasRole("ADMIN")
                     .anyRequest()
                     .authenticated())
         .httpBasic(basic -> basic.authenticationEntryPoint(unauthorized))

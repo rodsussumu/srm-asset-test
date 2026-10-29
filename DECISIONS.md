@@ -33,3 +33,15 @@ Bloco 2 implementado e validado localmente: motor decimal, prazo/elegibilidade, 
 Por orientação do usuário, testes, cobertura e relatórios do backend foram antecipados para a task 2.6. A CI usa clean verify: 74 testes locais passaram, com PostgreSQL descartável real e os golden cases. JaCoCo exige 80%/70% geral e 95%/90% por classe financeira, sem exclusões de produção. Publicação de artefatos não transforma falha em sucesso. O frontend continua com lint/build até a implementação do painel; não há suíte vazia simulando validação funcional.
 
 Flyway e aplicação ainda podem usar o mesmo login neste bloco; as credenciais segregadas e a proteção do histórico serão implantadas antes da liquidação, no bloco 4. Os testes usam banco próprio do Testcontainers e não dependem do volume Compose. Não houve execução remota da CI desta branch, smoke financeiro integrado ou aferição de desempenho. Resultados em [qualidade](docs/quality.md).
+
+## Câmbio e simulação — bloco 3
+
+V2 mantém histórico USD/BRL com NUMERIC(16,8), vigência/registro em UTC e unicidade por par/vigência. Entradas aceitam até microssegundos, evitando colisões silenciosas de precisão no PostgreSQL. A seleção ignora vigências futuras e registros posteriores ao instante da operação; exatamente 24 horas ainda é válido.
+
+O provedor HTTP é chamado antes da transação de gravação, com duas tentativas totais e timeout de 1 segundo sobre a resposta inteira, incluindo corpo bloqueado, mais 100 ms entre tentativas. Somente timeout/conexão/5xx são transitórios neste contrato; 4xx/payload inválido falham sem retry. A sincronização usa ON CONFLICT DO NOTHING: mesma vigência/valor recupera o original; outro valor conflita. Não reescreve origem ou registro histórico.
+
+A simulação captura um único instante para prazo e câmbio, é read-only e não cadastra recebível/liquidação. USD usa cotação local; BRL não depende dela. APP_ROLES protege mutações cambiais com ADMIN já nesta etapa, mantendo CSRF. A conta ainda é única; contas separadas e autenticação própria ficam no bloco 6.
+
+O Compose acrescenta somente o mock em Python stdlib, sem acoplá-lo à inicialização da API. A vigência é fixada ao iniciar, com sincronização explícita; não há alegação de dados de mercado. A credencial do banco ainda será segregada e impedida de alterar histórico no bloco 4. Logs de tentativas e contador existem agora; o formato JSON e as métricas financeiras do produto permanecem no bloco 7.
+
+Validação atual: 126 testes, 96,68% linhas/86,36% branches; limites JaCoCo preservados. A suíte HTTP prova as duas tentativas e término abaixo de 3 segundos nos cenários locais de timeout, sem inferir capacidade de produção. [Detalhes](docs/quality.md).

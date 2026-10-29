@@ -1,3 +1,8 @@
+pricing:
+  base-rate: ${PRICING_BASE_RATE:0.0100}
+fx:
+  provider:
+    url: ${FX_PROVIDER_URL:http://localhost:8090/rate}
 spring:
   application:
     name: srm-credit-engine
@@ -24,6 +29,7 @@ spring:
     user:
       name: ${APP_USERNAME:operator}
       password: ${APP_PASSWORD}
+      roles: ${APP_ROLES:OPERATOR}
 server:
   port: ${SERVER_PORT:8080}
   servlet:
@@ -37,7 +43,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health
+        include: health,metrics
   endpoint:
     health:
       probes:
@@ -46,3 +52,6 @@ management:
         readiness:
           include: readinessState,db
       show-details: never
+logging:
+  pattern:
+    level: "%5p [correlationId=%X{correlationId:-}]"

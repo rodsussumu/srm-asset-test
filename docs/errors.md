@@ -24,11 +24,14 @@ Os erros usam `application/problem+json`, com campos padrão Problem Details e e
 | 405 | METHOD_NOT_ALLOWED | Verbo não suportado; resposta informa Allow. |
 | 406 | NOT_ACCEPTABLE | Representação solicitada não disponível. |
 | 409 | DATA_CONFLICT | Conflito de integridade ou versão de dados. |
+| 409 | FX_RATE_EXISTS | Vigência já registrada; na sincronização, valor diferente do original. |
 | 415 | UNSUPPORTED_MEDIA_TYPE | Corpo em formato não suportado. |
 | 500 | INTERNAL_ERROR | Falha inesperada, sem expor a exceção interna. |
+| 503 | FX_RATE_UNAVAILABLE | Não há cotação local vigente com até 24 horas para USD. |
+| 503 | FX_PROVIDER_UNAVAILABLE | Sincronização falhou após política limitada; histórico preservado. |
 
 O filtro aceita X-Correlation-ID somente no formato UUID canônico; valor inválido é substituído por UUID gerado. Toda resposta recebe o cabeçalho, e erros devolvem o mesmo identificador no corpo. Ele também é colocado no MDC durante a requisição e retirado ao final, permitindo correlação nos logs JSON.
 
 O handler não retorna SQL, stack trace, credenciais, valores rejeitados ou mensagem de exceção inesperada. A falha inesperada é registrada com o tipo de exceção e correlação, sem copiar o payload. Os testes injetam uma falha somente no contexto de teste para comprovar que detalhes internos não aparecem na resposta; não há rota de falha na aplicação entregue.
 
-Códigos específicos de câmbio e liquidação serão adicionados quando esses fluxos forem implementados. Não são declarados funcionais pelo handler genérico desta etapa.
+Códigos específicos de liquidação serão adicionados no bloco 4. Os códigos cambiais acima já são exercitados pelos testes HTTP.

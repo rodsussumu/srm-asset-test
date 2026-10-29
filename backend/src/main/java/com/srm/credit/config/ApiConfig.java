@@ -19,11 +19,11 @@ import org.springframework.context.annotation.Configuration;
             title = "SRM Credit Engine",
             version = "v1",
             description =
-                "Cadastro e consulta de cedentes e recebíveis. Valores financeiros são strings decimais."))
+                "Cadastro de cedentes/recebíveis, histórico de câmbio, sincronização e simulação indicativa. Valores e taxas são strings decimais."))
 @SecurityScheme(name = "basicAuth", type = SecuritySchemeType.HTTP, scheme = "basic")
 public class ApiConfig {
   @Bean
-  Jackson2ObjectMapperBuilderCustomizer strictApiTypes() {
+  public Jackson2ObjectMapperBuilderCustomizer strictApiTypes() {
     return builder ->
         builder.postConfigurer(
             mapper -> {

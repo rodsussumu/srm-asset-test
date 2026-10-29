@@ -38,6 +38,18 @@ public final class FinancialAmounts {
     return value;
   }
 
+  public static BigDecimal parseFxRate(String text) {
+    if (text == null || !text.matches("(?:0|[1-9][0-9]{0,7})(?:\\.[0-9]{1,8})?")) {
+      throw new InvalidInputException(
+          "rate", "Informe uma string decimal positiva com até oito casas.");
+    }
+    BigDecimal value = new BigDecimal(text);
+    if (value.signum() <= 0) {
+      throw new InvalidInputException("rate", "Informe uma cotação positiva.");
+    }
+    return requireFxRate(value);
+  }
+
   public static BigDecimal roundMoney(BigDecimal value) {
     return value.setScale(2, RoundingMode.HALF_EVEN);
   }

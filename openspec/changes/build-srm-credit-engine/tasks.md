@@ -22,10 +22,10 @@ Executar por etapas, com uma branch por funcionalidade e pull request para main.
 
 ## 3. Câmbio e simulação
 
-- [ ] 3.1 Criar histórico de câmbio com vigência, origem e constraints; verificar duplicidade, valores inválidos, cotação futura e consulta por identificador em PostgreSQL.
-- [ ] 3.2 Implementar seleção temporal com validade de 24 horas; verificar ausência, exatamente 24 horas, expiração e escolha da última cotação elegível com clock controlado.
-- [ ] 3.3 Implementar provedor HTTP mockado e sincronização com duas tentativas totais, timeout de 1 segundo e intervalo de 100 ms; verificar recuperação após falha, limite de 3 segundos, ausência de retry em 4xx/payload inválido e sincronização repetida sem duplicar a mesma cotação.
-- [ ] 3.4 Expor simulação indicativa sem persistência financeira; verificar BRL sem câmbio, USD com cotação válida, 503 sem cotação e presença de todos os parâmetros de reprodução; documentar simulação e resiliência no OpenAPI/README.
+- [x] 3.1 Criar histórico de câmbio com vigência, origem e constraints; verificar duplicidade, valores inválidos, cotação futura e consulta por identificador em PostgreSQL.
+- [x] 3.2 Implementar seleção temporal com validade de 24 horas; verificar ausência, exatamente 24 horas, expiração e escolha da última cotação elegível com clock controlado.
+- [x] 3.3 Implementar provedor HTTP mockado e sincronização com duas tentativas totais, timeout de 1 segundo e intervalo de 100 ms; verificar recuperação após falha, limite de 3 segundos, ausência de retry em 4xx/payload inválido e sincronização repetida sem duplicar a mesma cotação.
+- [x] 3.4 Expor simulação indicativa sem persistência financeira; verificar BRL sem câmbio, USD com cotação válida, 503 sem cotação e presença de todos os parâmetros de reprodução; documentar simulação e resiliência no OpenAPI/README.
 
 ## 4. Liquidação transacional, idempotência e auditoria
 

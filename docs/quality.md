@@ -1,4 +1,6 @@
-# Testes, cobertura e CI — bloco 2
+# Testes, cobertura e CI
+
+## Validação do bloco 2 — 28/10/2026
 
 Validação local em 28/10/2026, com Java 21 e Docker. `./mvnw -B -ntp clean verify` passou com **74 testes**, zero falhas, erros ou skips:
 
@@ -58,3 +60,21 @@ Com Java 21 e Docker ativos, no backend:
 ```
 
 Relatórios gerados ficam ignorados no Git. Evite interpretar o teste isolado de entidade com versão antiga como prova da disputa entre duas liquidações: esse cenário pertence ao bloco 4. Não houve aferição HTTP, smoke completo ou testes do painel nesta etapa.
+
+## Validação atual — bloco 3, 29/10/2026
+
+`./mvnw -B -ntp clean verify` passou com **126 testes**, zero falhas/erros/skips, Spotless e todos os critérios JaCoCo aprovados. São 74 casos anteriores, 36 de FxIntegrationTest e 16 de FxProviderClientTest. Cobertura atual: **495/512 linhas (96,68%)** e **114/132 branches (86,36%)**. Os mínimos gerais 80%/70% e financeiros 95%/90% não foram alterados e nenhuma exclusão foi adicionada.
+
+As integrações PostgreSQL verificam V1/V2 em banco limpo, precisão/constraints do câmbio, duplicidade, histórico e consulta por UUID, escolha temporal com Clock fixo, cotação ausente/futura, exatamente 24 horas e expiração um microssegundo depois. A simulação HTTP reproduz C1/C2/C3 com strings e preserva as contagens do cadastro/histórico; sem cotação, BRL continua e USD retorna 503. ADMIN/CSRF são exigidos nas mutações cambiais; OPERATOR não consegue gravá-las. A sincronização repetida recupera o mesmo UUID sem reescrever o original; mesma vigência com outro valor conflita.
+
+O servidor HTTP de teste verifica recuperação 5xx, intervalo de 100 ms, duas tentativas totais, conexão recusada, ausência de retry em 4xx e payload inválido. Dois timeouts, inclusive com headers recebidos e corpo bloqueado, terminam entre 2 e 3 segundos no ambiente local. Esses limites são evidência do cenário testado, não garantia de latência em produção. A chamada externa precede a transação de persistência; a simulação consulta somente o banco.
+
+O Compose foi validado com .env.example. A imagem fx-mock foi construída e iniciada isoladamente no projeto srm-new-task3, porta 18093. GET /rate retornou rate string 5.4321, origin local-mock e effectiveAt UTC com microssegundos. O teste não iniciou banco/API nem alterou o Compose habitual. O mock e a rede temporários foram encerrados após a consulta; não houve remoção de volume de dados existente.
+
+A CI já executa as novas suítes por clean verify e publica os mesmos relatórios Surefire/JaCoCo por 14 dias. Não há evidência de execução remota desta branch nesta etapa. Liquidação, rollback financeiro, concorrência de confirmações, testes funcionais Angular, smoke integral e aferição HTTP permanecem nos blocos seguintes.
+
+### Regressão real do contrato OpenAPI
+
+A revisão detectou ausência de 200 na documentação gerada de GET /api/v1/fx-rates/current. Foi acrescentada uma asserção ao teste publishesSimulationAndCurrencyContractsInOpenApi antes de corrigir o controller; a execução isolada retornou exit 1 com No value at JSON path para responses['200']. A correção declarou 200 explicitamente. Os erros também passaram a declarar application/problem+json/ProblemDetail, com asserção no 503 de simulação, em vez de herdar o schema de sucesso. O número de casos permanece 126: foram fortalecidas as asserções de um teste existente.
+
+Após as correções do contrato, spotless:apply clean verify foi repetido e passou com os mesmos 126 testes, zero falhas/erros/skips e todos os limites JaCoCo.
