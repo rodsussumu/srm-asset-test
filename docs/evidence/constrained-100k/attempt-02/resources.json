@@ -1,0 +1,143 @@
+{
+  "started_at": "2026-10-29T17:20:54.435347+00:00",
+  "limits_before": {
+    "backend": {
+      "NanoCpus": 1250000000,
+      "Memory": 2147483648,
+      "MemorySwap": 2147483648,
+      "OOMKilled": false,
+      "RestartCount": 0,
+      "Status": "running"
+    },
+    "postgres": {
+      "NanoCpus": 500000000,
+      "Memory": 1610612736,
+      "MemorySwap": 1610612736,
+      "OOMKilled": false,
+      "RestartCount": 0,
+      "Status": "running"
+    },
+    "frontend": {
+      "NanoCpus": 150000000,
+      "Memory": 268435456,
+      "MemorySwap": 268435456,
+      "OOMKilled": false,
+      "RestartCount": 0,
+      "Status": "running"
+    },
+    "fx-mock": {
+      "NanoCpus": 100000000,
+      "Memory": 268435456,
+      "MemorySwap": 268435456,
+      "OOMKilled": false,
+      "RestartCount": 0,
+      "Status": "running"
+    }
+  },
+  "cgroups_before": {
+    "backend": {
+      "cpu.stat": "usage_usec 9100338\nuser_usec 8741475\nsystem_usec 358863\nnice_usec 0\nnr_periods 466\nnr_throttled 61\nthrottled_usec 6555854\nnr_bursts 0\nburst_usec 0",
+      "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+      "memory.peak": "472285184"
+    },
+    "postgres": {
+      "cpu.stat": "usage_usec 1529491\nuser_usec 899022\nsystem_usec 630469\nnice_usec 0\nnr_periods 176\nnr_throttled 12\nthrottled_usec 616510\nnr_bursts 0\nburst_usec 0",
+      "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+      "memory.peak": "190562304"
+    },
+    "frontend": {
+      "cpu.stat": "usage_usec 247030\nuser_usec 171098\nsystem_usec 75931\nnice_usec 0\nnr_periods 38\nnr_throttled 7\nthrottled_usec 366007\nnr_bursts 0\nburst_usec 0",
+      "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+      "memory.peak": "16867328"
+    },
+    "fx-mock": {
+      "cpu.stat": "usage_usec 3396193\nuser_usec 2870744\nsystem_usec 525448\nnice_usec 0\nnr_periods 388\nnr_throttled 330\nthrottled_usec 29446301\nnr_bursts 0\nburst_usec 0",
+      "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+      "memory.peak": "30732288"
+    }
+  },
+  "monitor_command": [
+    "docker",
+    "stats",
+    "--no-trunc",
+    "--format",
+    "{{json .}}",
+    "ab402d97601edd68e2bce39a21acb8ccafaa91b541addbb50bb14c6d57d2eb5f",
+    "295475294deb83fd5ae4f27b7b669836d6e356885f5db134888eae31672bd179",
+    "bedf665bf280768a3129168390185bdc50c152bafaa9a6f84ac3aa3e4f5a3798",
+    "2c24f4ee418176540ab4a9b96de34898cab6dc80b95c946334894c867af69eb9"
+  ],
+  "load_command": [
+    "/opt/homebrew/opt/python@3.14/bin/python3.14",
+    "-u",
+    "/Users/rodrigo/Documents/projects/srm-asset-test/scripts/benchmark/http-load.py",
+    "--base-url",
+    "http://127.0.0.1:14210",
+    "--clients",
+    "10",
+    "--requests",
+    "50000",
+    "--warmup",
+    "1000",
+    "--output",
+    "docs/evidence/constrained-100k/attempt-02"
+  ],
+  "load_exit_code": 0,
+  "limits_after": {
+    "backend": {
+      "NanoCpus": 1250000000,
+      "Memory": 2147483648,
+      "MemorySwap": 2147483648,
+      "OOMKilled": false,
+      "RestartCount": 0,
+      "Status": "running"
+    },
+    "postgres": {
+      "NanoCpus": 500000000,
+      "Memory": 1610612736,
+      "MemorySwap": 1610612736,
+      "OOMKilled": false,
+      "RestartCount": 0,
+      "Status": "running"
+    },
+    "frontend": {
+      "NanoCpus": 150000000,
+      "Memory": 268435456,
+      "MemorySwap": 268435456,
+      "OOMKilled": false,
+      "RestartCount": 0,
+      "Status": "running"
+    },
+    "fx-mock": {
+      "NanoCpus": 100000000,
+      "Memory": 268435456,
+      "MemorySwap": 268435456,
+      "OOMKilled": false,
+      "RestartCount": 0,
+      "Status": "running"
+    }
+  },
+  "cgroups_after": {
+    "backend": {
+      "cpu.stat": "usage_usec 110605921\nuser_usec 96043147\nsystem_usec 14562774\nnice_usec 0\nnr_periods 2634\nnr_throttled 464\nthrottled_usec 106616033\nnr_bursts 0\nburst_usec 0",
+      "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+      "memory.peak": "529203200"
+    },
+    "postgres": {
+      "cpu.stat": "usage_usec 88223636\nuser_usec 74063463\nsystem_usec 14160172\nnice_usec 0\nnr_periods 2281\nnr_throttled 1666\nthrottled_usec 689446847\nnr_bursts 0\nburst_usec 0",
+      "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+      "memory.peak": "190562304"
+    },
+    "frontend": {
+      "cpu.stat": "usage_usec 15130431\nuser_usec 4244782\nsystem_usec 10885649\nnice_usec 0\nnr_periods 2149\nnr_throttled 232\nthrottled_usec 19735228\nnr_bursts 0\nburst_usec 0",
+      "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+      "memory.peak": "17108992"
+    },
+    "fx-mock": {
+      "cpu.stat": "usage_usec 11162281\nuser_usec 9747056\nsystem_usec 1415224\nnice_usec 0\nnr_periods 1239\nnr_throttled 1086\nthrottled_usec 96959468\nnr_bursts 0\nburst_usec 0",
+      "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0",
+      "memory.peak": "34181120"
+    }
+  },
+  "finished_at": "2026-10-29T17:24:33.898398+00:00"
+}

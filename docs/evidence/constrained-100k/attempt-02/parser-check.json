@@ -1,0 +1,10 @@
+{
+  "method": "Offline regression using the corrected parse_sample function and four previously captured real Docker stats payloads, prefixed with terminal clear/home sequences. Not a new live workload or replacement for missing backend streaming samples.",
+  "services": [
+    "srm-constrained-backend-1",
+    "srm-constrained-frontend-1",
+    "srm-constrained-fx-mock-1",
+    "srm-constrained-postgres-1"
+  ],
+  "result": "four payloads preserved after ANSI stripping"
+}

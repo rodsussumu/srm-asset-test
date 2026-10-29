@@ -12,7 +12,7 @@ Prioridades: P0 impede uso do endpoint com dinheiro real; P1 compromete a opera�
 
 **Correção:** parâmetros tipados em todas as consultas; UUID e enum validados na fronteira; nomes de tabelas/colunas/ordenação devem vir de fragmentos fixos, nunca do cliente. A conexão de negócio deve ter privilégios mínimos e não ser dona do histórico.
 
-**Prevenção:** review de toda concatenação SQL, testes com entradas malformadas e integração executada com a credencial restrita. No projeto: [repositórios JDBC](backend/src/main/java/com/srm/credit/repository/) e [permissões reais](backend/src/test/java/com/srm/credit/SettlementSchemaTest.java).
+**Prevenção:** review de toda concatenação SQL, testes com entradas malformadas e integração executada com a credencial restrita. No projeto: [repositórios JDBC](backend/src/main/java/com/srm/credit/repository/) e [permissões reais](backend/src/test/java/com/srm/credit/integration/SettlementSchemaTest.java).
 
 ## 2. P0 — Taxas percentuais usadas como multiplicadores
 
@@ -32,7 +32,7 @@ Prioridades: P0 impede uso do endpoint com dinheiro real; P1 compromete a opera�
 
 **Correção:** uma transação engloba reserva idempotente, controle de estado/versão, auditoria e resultado da resposta. Qualquer falha, inclusive no commit, deve desfazer todas as gravações. Só responder sucesso depois do commit.
 
-**Prevenção:** injetar falhas antes/depois do INSERT e em constraint diferida no commit. [Transação](backend/src/main/java/com/srm/credit/service/SettlementTransactionService.java) e [integrações de rollback](backend/src/test/java/com/srm/credit/SettlementIntegrationTest.java).
+**Prevenção:** injetar falhas antes/depois do INSERT e em constraint diferida no commit. [Transação](backend/src/main/java/com/srm/credit/service/SettlementTransactionService.java) e [integrações de rollback](backend/src/test/java/com/srm/credit/integration/SettlementIntegrationTest.java).
 
 ## 4. P0 — Duplicidade por retry e por concorrência
 

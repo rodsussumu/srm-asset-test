@@ -1,5 +1,9 @@
 # Testes, cobertura e CI
 
+## Organização dos testes Java
+
+Os testes em `backend/src/test/java/com/srm/credit` espelham os pacotes da aplicação: `config`, `controller`, `service`, `model` e `repository`. Testes que verificam várias camadas ou o schema real ficam em `integration`; auxiliares compartilhados ficam em `support`. Os nomes das classes de teste foram preservados, inclusive para execução seletiva com `-Dtest`.
+
 ## Validação do bloco 2 — 28/10/2026
 
 Validação local em 28/10/2026, com Java 21 e Docker. `./mvnw -B -ntp clean verify` passou com **74 testes**, zero falhas, erros ou skips:
@@ -141,3 +145,23 @@ O workflow mantém clean verify obrigatório com PostgreSQL real, relatórios ba
 REVIEW foi conferido contra o Anexo A fornecido: prioriza SQL injection, taxas, atomicidade, duplicidade e falso sucesso; inclui precisão, autorização, validade/resiliência cambial e histórico. ER foi confrontado com V1–V5 e C4 com os serviços reais do Compose. Links locais, YAML, configuração Compose, scripts e OpenSpec estrito foram verificados. Smoke final, p95 HTTP e walkthrough do bloco 8 permanecem pendentes.
 
 A revisão final também removeu o log HTTP padrão do mock, que poderia registrar paths arbitrários. Após rebuild isolado do mock descartável, /rate retornou 200 e um path com canário sintético retornou 404; docker compose logs do mock permaneceu vazio. Nenhum segredo/path é usado como mensagem de log nesse serviço.
+
+## Validação final — bloco 8, 29/10/2026
+
+`./mvnw -B -ntp spotless:apply clean verify` aprovado: **198 testes**, zero falhas/erros/skips, PostgreSQL real. Inclui StrategyExtensionTest com outro spread e a mesma fórmula, sem novo tipo de produção. JaCoCo: **977/1006 linhas (97,12%)** e **226/262 branches (86,26%)**. Todos os gates gerais e financeiros atendidos; sem exclusões ou relaxamento dos mínimos. [Resumo](evidence/quality-summary.txt).
+
+Angular lint e 48 testes em seis arquivos passaram, com JUnit XML. As imagens foram construídas pelo Compose e iniciaram em banco limpo. O smoke HTTP percorreu autenticação, cadastro, C1/C3, confirmação/replay/extrato, provedor fora e readiness sem banco; o Chrome confirmou mais uma operação USD, filtro remoto, recarga e logout. [Smoke e captura](smoke.md).
+
+A aferição com 10000/5000 registros, 10 clientes e 1000 medidas por rota após 200 de aquecimento resultou em erro zero, p95 16,628 ms na simulação e 17,311 ms no extrato. Metadados, inventário, saída e CSV são desta execução. Uma auditoria independente verificou 100 medidas por cliente/rota, status 200, percentis nearest-rank e hash do CSV. Não houve escolha da melhor repetição ou alteração dos alvos. [Método e limites](performance.md).
+
+A matriz de 32 requisitos/59 cenários foi conferida contra as seis specs e os métodos Java citados existem. O roteiro tem 10 minutos, com comandos de concorrência determinística e extensão por strategy cobertos na suíte final. [Rastreabilidade](traceability.md) e [walkthrough](walkthrough.md).
+
+O .gitignore já protegia builds/dependências/.env/logs e agora também caches Python usados pelos scripts. Nenhum arquivo rastreado corresponde às regras atuais de exclusão; docs/evidence contém apenas resultados selecionados para revisão, não diretórios de build. CI remota/download dos artefatos, aprovação comercial, convites e defesa ao vivo continuam sem evidência. O estado local concluído não comprova esses passos externos.
+
+## Cenário restrito adicional — 29/10/2026
+
+Override de Compose com soma efetiva 2 CPUs/4 GiB, dez clientes, 1000 requisições de aquecimento/rota e 100 mil medidas (50 mil/rota). A segunda tentativa concluiu exit 0, todas as respostas HTTP 200/payload válido, p95 60,923 ms na simulação e 94,195 ms no extrato, com p99 75,144/99,515 ms. Percentis e distribuição de 5000 medidas por cliente/rota foram recalculados do CSV; gzip e SHA-256 preservam os dados. Inventário final 10000/5000, sem OOM/reinícios. Nenhum código de produção foi alterado.
+
+A primeira tentativa reprovada permanece registrada, com suspensão do host e falhas de transporte/sessão. A repetição teve prevenção temporária de idle sleep e limite de 900 segundos. O parser original do coletor omitiu backend no stream; não há alegação de curva completa desse serviço. Contadores cgroup antes/depois cobrem os quatro e o parser corrigido foi conferido com replay offline dos payloads reais. [Relatório completo](performance-constrained.md).
+
+AST/CLI dos scripts, configuração Compose, regras de ignore, links locais, 32 requisitos/60 cenários e OpenSpec estrito foram conferidos. Os resultados da suíte final de 198 testes backend/48 Angular continuam registrados; ela não foi repetida para mudanças apenas de benchmark/documentação. Não há inferência de capacidade sustentada ou ganho causal isolado, pois volume, duração e recursos diferem da referência.

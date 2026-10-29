@@ -1,4 +1,4 @@
-package com.srm.credit;
+package com.srm.credit.integration;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.srm.credit.repository.FxRateRepository;
+import com.srm.credit.support.FxHttpFixture;
 import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;

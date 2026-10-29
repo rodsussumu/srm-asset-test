@@ -1,0 +1,23 @@
+# Benchmark profile: steady-state aggregate limits = 2 CPUs / 4 GiB, swap disabled.
+# Bootstrap runs before the backend; it is not part of the measurement.
+services:
+  backend:
+    cpus: 1.25
+    mem_limit: 2g
+    memswap_limit: 2g
+  postgres:
+    cpus: 0.50
+    mem_limit: 1536m
+    memswap_limit: 1536m
+  frontend:
+    cpus: 0.15
+    mem_limit: 256m
+    memswap_limit: 256m
+  fx-mock:
+    cpus: 0.10
+    mem_limit: 256m
+    memswap_limit: 256m
+  db-bootstrap:
+    cpus: 0.25
+    mem_limit: 128m
+    memswap_limit: 128m

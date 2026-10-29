@@ -1,4 +1,4 @@
-package com.srm.credit;
+package com.srm.credit.support;
 
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
@@ -14,17 +14,17 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /** Real HTTP fixture: exercises status, request count and timeouts including stalled bodies. */
-final class FxHttpFixture implements AutoCloseable {
-  static final String VALID =
+public final class FxHttpFixture implements AutoCloseable {
+  public static final String VALID =
       "{\"rate\":\"5.4321\",\"origin\":\"test-provider\",\"effectiveAt\":\"2026-10-28T14:00:00Z\"}";
-  final AtomicInteger calls = new AtomicInteger();
-  final Queue<Reply> replies = new ConcurrentLinkedQueue<>();
-  final Queue<Long> started = new ConcurrentLinkedQueue<>();
+  public final AtomicInteger calls = new AtomicInteger();
+  public final Queue<Reply> replies = new ConcurrentLinkedQueue<>();
+  public final Queue<Long> started = new ConcurrentLinkedQueue<>();
   final CountDownLatch release = new CountDownLatch(1);
   final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
-  final HttpServer server;
+  public final HttpServer server;
 
-  FxHttpFixture() throws IOException {
+  public FxHttpFixture() throws IOException {
     server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
     server.setExecutor(executor);
     server.createContext(
@@ -53,21 +53,21 @@ final class FxHttpFixture implements AutoCloseable {
     server.start();
   }
 
-  URI uri() {
+  public URI uri() {
     return URI.create("http://127.0.0.1:" + server.getAddress().getPort() + "/rate");
   }
 
-  void reset() {
+  public void reset() {
     calls.set(0);
     replies.clear();
     started.clear();
   }
 
-  void enqueue(int status, String body) {
+  public void enqueue(int status, String body) {
     replies.add(new Reply(status, body, false, false));
   }
 
-  record Reply(int status, String body, boolean stallHeaders, boolean stallBody) {}
+  public record Reply(int status, String body, boolean stallHeaders, boolean stallBody) {}
 
   public void close() {
     release.countDown();

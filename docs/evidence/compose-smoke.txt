@@ -1,0 +1,18 @@
+Execução do bloco 8 em 29/10/2026; projeto limpo srm-new-task8.
+Portas: PostgreSQL 55448; API 18088; nginx 14208; mock 18098.
+Comando: python3 -u scripts/verify-compose.py --project srm-new-task8 --env-file /tmp/srm-new-task8.env --base-url http://127.0.0.1:14208
+
+PASS runtime SQL login: application connections, INSERT allowed and history UPDATE/DELETE denied
+PASS proxy, health, session cookies, login/CSRF, correlation and FX synchronization
+ Container srm-new-task8-fx-mock-1  Stopping
+ Container srm-new-task8-fx-mock-1  Stopped
+PASS provider stopped: C1/C3 simulation, settlement, three exact replays, counters and separate totals
+ Container srm-new-task8-fx-mock-1  Starting
+ Container srm-new-task8-fx-mock-1  Started
+ Container srm-new-task8-postgres-1  Stopping
+ Container srm-new-task8-postgres-1  Stopped
+PASS database stopped: readiness 503 with no details, liveness 200
+ Container srm-new-task8-postgres-1  Starting
+ Container srm-new-task8-postgres-1  Started
+PASS JSON events: UTC, correlation, outcome, audit identifiers and no probe secrets; exactly two confirmation events
+PASS all Compose operational checks; synthetic records remain in the disposable project
