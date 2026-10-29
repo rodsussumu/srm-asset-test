@@ -29,13 +29,13 @@ Executar por etapas, com uma branch por funcionalidade e pull request para main.
 
 ## 4. Liquidação transacional, idempotência e auditoria
 
-- [ ] 4.1 Criar migrations de liquidações e idempotência com snapshots, unicidade por recebível e chave por ator/rota; verificar precisão de pagamento `NUMERIC(30,2)` e limites máximos no PostgreSQL.
-- [ ] 4.2 Separar papéis de migração e execução e proteger histórico; verificar que a credencial real da aplicação não altera/exclui liquidações ou cotações e não altera resultado idempotente já confirmado, mas consegue completar sua reserva na transação.
-- [ ] 4.3 Implementar reserva da chave, hash canônico e replay antes de recálculo; verificar retry sequencial, chave com outro corpo, duas requisições simultâneas com mesma chave, espera limitada e recuperação após rollback; documentar semântica e retenção.
-- [ ] 4.4 Implementar confirmação com recálculo, valor/cotação esperados, optimistic locking, flush e commit atômico; verificar sucesso 201, PRICE_CHANGED sem efeito, título indisponível e moeda divergente.
-- [ ] 4.5 Demonstrar concorrência com duas transações lendo a mesma versão e barreira determinística; verificar exatamente uma confirmação, um 409, uma liquidação e um incremento de versão, sem sleeps arbitrários.
-- [ ] 4.6 Demonstrar rollback por falha entre gravações e retry após resposta perdida; verificar ausência de registros parciais e reprodução exata de status/corpo/Location após commit.
-- [ ] 4.7 Implementar consulta da liquidação e concluir OpenAPI do fluxo; verificar reprodução histórica após nova cotação e registrar no README o protocolo de confirmação e seus limites.
+- [x] 4.1 Criar migrations de liquidações e idempotência com snapshots, unicidade por recebível e chave por ator/rota; verificar precisão de pagamento `NUMERIC(30,2)` e limites máximos no PostgreSQL.
+- [x] 4.2 Separar papéis de migração e execução e proteger histórico; verificar que a credencial real da aplicação não altera/exclui liquidações ou cotações e não altera resultado idempotente já confirmado, mas consegue completar sua reserva na transação.
+- [x] 4.3 Implementar reserva da chave, hash canônico e replay antes de recálculo; verificar retry sequencial, chave com outro corpo, duas requisições simultâneas com mesma chave, espera limitada e recuperação após rollback; documentar semântica e retenção.
+- [x] 4.4 Implementar confirmação com recálculo, valor/cotação esperados, optimistic locking, flush e commit atômico; verificar sucesso 201, PRICE_CHANGED sem efeito, título indisponível e moeda divergente.
+- [x] 4.5 Demonstrar concorrência com duas transações lendo a mesma versão e barreira determinística; verificar exatamente uma confirmação, um 409, uma liquidação e um incremento de versão, sem sleeps arbitrários.
+- [x] 4.6 Demonstrar rollback por falha entre gravações e retry após resposta perdida; verificar ausência de registros parciais e reprodução exata de status/corpo/Location após commit.
+- [x] 4.7 Implementar consulta da liquidação e concluir OpenAPI do fluxo; verificar reprodução histórica após nova cotação e registrar no README o protocolo de confirmação e seus limites.
 
 ## 5. Extrato analítico
 

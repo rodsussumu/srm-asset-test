@@ -78,3 +78,24 @@ A CI já executa as novas suítes por clean verify e publica os mesmos relatóri
 A revisão detectou ausência de 200 na documentação gerada de GET /api/v1/fx-rates/current. Foi acrescentada uma asserção ao teste publishesSimulationAndCurrencyContractsInOpenApi antes de corrigir o controller; a execução isolada retornou exit 1 com No value at JSON path para responses['200']. A correção declarou 200 explicitamente. Os erros também passaram a declarar application/problem+json/ProblemDetail, com asserção no 503 de simulação, em vez de herdar o schema de sucesso. O número de casos permanece 126: foram fortalecidas as asserções de um teste existente.
 
 Após as correções do contrato, spotless:apply clean verify foi repetido e passou com os mesmos 126 testes, zero falhas/erros/skips e todos os limites JaCoCo.
+
+## Validação atual — bloco 4, 29/10/2026
+
+`./mvnw -B -ntp spotless:apply clean verify` passou com **164 testes**, zero falhas/erros/skips. Permanecem os 126 casos anteriores, com mais 35 em SettlementIntegrationTest e 3 em SettlementSchemaTest. JaCoCo: **776/804 linhas (96,52%)** e **187/218 branches (85,78%)**; mínimos gerais e financeiros aprovados, sem exclusões ou redução dos limites.
+
+### Evidências de integridade
+
+- Duas transações reais leem version=0 sob CyclicBarrier e confirmam com chaves distintas. O teste exige 201/409, uma liquidação, um resultado idempotente e version=1. O controle da leitura fica em BeanPostProcessor apenas do contexto de teste.
+- Mesma chave concorrente espera e recupera os mesmos bytes/status/Location; espera acima de 3 segundos gera REQUEST_IN_PROGRESS/Retry-After. Se a primeira operação desfaz, o retry pode assumir a reserva.
+- Falhas antes/depois do INSERT e em constraint trigger diferido no commit desfazem estado, versão, auditoria e reserva. Uma falha de transporte após commit é recuperada por replay sem recálculo.
+- A aplicação de integração conecta com login srm_app, distinto do dono das migrations. O bootstrap SQL real foi executado nos bancos descartáveis. O runtime consegue confirmar/completar a reserva e não consegue UPDATE/DELETE/TRUNCATE de liquidações/cotações, apagar/regravar idempotência confirmada ou alterar a constraint de unicidade.
+- O limite NUMERIC(30,2), overflow, balanço BRL e unicidade por título são testados no PostgreSQL. Reserva incompleta não pode ser confirmada isoladamente.
+- C1/C2/C3 são confirmados por HTTP com snapshots completos. PRICE_CHANGED, moeda inválida, estado/prazo inelegível e cotação ausente falham sem registros parciais. Nova cotação/nome de cedente não altera a leitura histórica ou o replay.
+
+### Contrato e configuração
+
+O teste OpenAPI verifica Idempotency-Key obrigatório, snapshot 201, consulta individual 200 e schema ProblemDetail/application/problem+json no 409. A primeira atualização deixou a anotação 409 sem esse schema; o teste reforçado falhou e a anotação foi corrigida. A repetição limpa completa passou com 164 testes. Não foi alterada a regra financeira para fabricar uma falha.
+
+Compose foi validado com .env.example e inclui PostgreSQL, db-bootstrap e mock; a API continua no host. O bootstrap no Compose deve ser executado antes da API, sem apagar volumes existentes. A implementação usa credenciais distintas no atendimento e nas migrations, mas o processo backend ainda recebe ambas ao iniciar. A segregação não é isolamento contra comprometimento completo do processo.
+
+Não houve alteração do .env real, criação/reinício do Compose habitual ou remoção de volume de dados. Os PostgreSQL de teste são descartáveis e encerrados pelo Testcontainers. CI já executa as novas suítes pelo mesmo clean verify; execução remota desta branch, extrato, painel, métricas de confirmações e smoke integrado permanecem nos blocos correspondentes.

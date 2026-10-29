@@ -1,6 +1,6 @@
 # Câmbio e resiliência
 
-O par único é `USD/BRL`: uma unidade de USD custa `rate` BRL. Valores são strings decimais positivas de até oito casas e oito dígitos inteiros. O histórico guarda UUID, origem, vigência e registro em UTC. `V2__create_fx_rates.sql` aplica unicidade por par/vigência; a API oferece somente inserção e consulta. Correções precisam de nova vigência, preservando o registro anterior. A restrição de UPDATE/DELETE pela credencial do banco pertence ao item 4.2 e ainda está pendente.
+O par único é `USD/BRL`: uma unidade de USD custa `rate` BRL. Valores são strings decimais positivas de até oito casas e oito dígitos inteiros. O histórico guarda UUID, origem, vigência e registro em UTC. `V2__create_fx_rates.sql` aplica unicidade por par/vigência; a API oferece somente inserção e consulta. Correções precisam de nova vigência, preservando o registro anterior. O papel de execução agora não recebe UPDATE/DELETE/TRUNCATE do histórico; migrations e conexão de negócio usam credenciais distintas, conforme docs/database.md.
 
 `POST /api/v1/fx-rates` requer ADMIN e CSRF válido:
 

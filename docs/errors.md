@@ -25,6 +25,10 @@ Os erros usam `application/problem+json`, com campos padrão Problem Details e e
 | 406 | NOT_ACCEPTABLE | Representação solicitada não disponível. |
 | 409 | DATA_CONFLICT | Conflito de integridade ou versão de dados. |
 | 409 | FX_RATE_EXISTS | Vigência já registrada; na sincronização, valor diferente do original. |
+| 409 | PRICE_CHANGED | Pagamento ou cotação divergem da confirmação; simular/confirmar novamente. |
+| 409 | IDEMPOTENCY_KEY_REUSED | Mesma chave por operador/rota já associada a outro conteúdo. |
+| 409 | RECEIVABLE_ALREADY_SETTLED | Título liquidado ou disputa otimista perdida. |
+| 409 | REQUEST_IN_PROGRESS | Espera pela chave excedeu 3 segundos; Retry-After: 1. |
 | 415 | UNSUPPORTED_MEDIA_TYPE | Corpo em formato não suportado. |
 | 500 | INTERNAL_ERROR | Falha inesperada, sem expor a exceção interna. |
 | 503 | FX_RATE_UNAVAILABLE | Não há cotação local vigente com até 24 horas para USD. |
@@ -34,4 +38,4 @@ O filtro aceita X-Correlation-ID somente no formato UUID canônico; valor invál
 
 O handler não retorna SQL, stack trace, credenciais, valores rejeitados ou mensagem de exceção inesperada. A falha inesperada é registrada com o tipo de exceção e correlação, sem copiar o payload. Os testes injetam uma falha somente no contexto de teste para comprovar que detalhes internos não aparecem na resposta; não há rota de falha na aplicação entregue.
 
-Códigos específicos de liquidação serão adicionados no bloco 4. Os códigos cambiais acima já são exercitados pelos testes HTTP.
+Os códigos de câmbio e liquidação são exercitados pelos testes HTTP com PostgreSQL real. No fluxo financeiro, falhas inesperadas de integridade ou commit são 500; conflitos de unicidade por recebível e versão são mapeados especificamente para RECEIVABLE_ALREADY_SETTLED, fora da transação abortada.
