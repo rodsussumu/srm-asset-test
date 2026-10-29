@@ -2,7 +2,7 @@
 
 ## Context
 
-O projeto possui blocos 2 a 7: domínio/MVC, câmbio, liquidação ACID/idempotente, extrato, sessão/painel, logs JSON/métricas e Compose completo. V1–V5 mantêm precisão, permissões e índices. A validação local inclui 197 testes backend, 48 Angular e checks operacionais pelo proxy com provedor/banco parados e recuperados. A CI mantém verify/cobertura backend e publica JUnit Angular; execução remota desta branch não foi verificada. REVIEW, ER/C4 e evidências de uso de IA estão documentados. Smoke final, aferição HTTP e walkthrough permanecem no bloco 8. Premissas foram definidas no SPEC antes do código.
+O projeto possui os blocos 2 a 8 implementados e validados localmente: domínio/MVC, câmbio, liquidação ACID/idempotente, extrato, sessão/painel, observabilidade e Compose. V1–V5 mantêm precisão, permissões e índices. A suíte final passou com 198 testes backend/48 Angular, além de smoke BRL/USD e benchmark HTTP com 10000/5000 registros, 10 clientes e 1000 medidas/rota após aquecimento. O recorte local teve erro zero e p95 16,628 ms/17,311 ms, sem garantia de capacidade de produção. Rastreabilidade cobre 32 requisitos/60 cenários; o roteiro de defesa está preparado. CI remota, aceite comercial e defesa humana não foram aferidos. Premissas foram definidas no SPEC antes do código.
 
 ## Goals / Non-Goals
 
@@ -157,3 +157,7 @@ Os diagramas finais estão em docs/c4.md e docs/er.md, ligados no README, distin
 ## Migration Plan
 
 Não existem dados a migrar. Criar migrations versionadas e reexecutáveis em banco limpo, com papéis separados; inicializar dados opcionais por procedimento explícito. O primeiro ambiente será local via Compose. Antes da primeira publicação, executar CI, smoke e aferição e atualizar documentação com os resultados. Rollback da aplicação não deve apagar liquidações; mudanças de esquema futuras devem preservar leitura do histórico. Reset de volume fica restrito ao ambiente descartável e deve ser documentado como destrutivo.
+
+## Ensaio adicional com recursos restritos
+
+Por escolha explícita do autor, o cenário adicional aplica soma de cotas 2 CPUs/4 GiB ao backend/PostgreSQL/nginx/mock e 100 mil medidas (50 mil por rota), preservando a referência. O perfil é opcional, sem mudar a configuração global do Docker. A segunda tentativa atingiu p95 60,923/94,195 ms e erro zero; a primeira foi interrompida por condições do host e foi preservada com falhas. O relatório registra recursos, quotas, limitação do parser original e correção verificada, sem alegar equivalência a uma VM ou capacidade de produção. Detalhes em docs/performance-constrained.md.

@@ -1,0 +1,20 @@
+{
+  "recorded_on": "2026-10-29",
+  "host": "Apple M2, 8 CPUs, 24 GiB; Docker Linux aarch64, 8 CPUs/12591218688 bytes available, shared host",
+  "profile": "compose.benchmark.yaml",
+  "scope": "Steady-state container quota sums, not a dedicated 2 CPU/4 GiB VM. Driver, Docker daemon and OS are outside this budget.",
+  "runtime": "Java Temurin 21.0.12.1, Spring Boot 3.5.16, PostgreSQL 17.11",
+  "python": "3.14.7",
+  "clients": 10,
+  "measured_per_route": 50000,
+  "warmup_per_route": 1000,
+  "fixture": {
+    "receivables": 10000,
+    "settlements": 5000
+  },
+  "profile_sha256": "6067354375d3c97e48bc11b120f850768df785d6d9a4b360a2b6800d42b0b90a",
+  "driver_sha256": "0f1130737a1575ee8749c9934f7703f90457747254844d0c3b6519fee40dcec0",
+  "observer_current_sha256": "80001f8795a2becc3e8b29173b59637f02c80af3cc65f819b572f84369bb8c35",
+  "observer_as_run_provenance": "attempt-02/observer-provenance.json",
+  "baseline": "../http-summary.json"
+}

@@ -1,8 +1,7 @@
-package com.srm.credit;
+package com.srm.credit.config;
 
 import static org.assertj.core.api.Assertions.*;
 
-import com.srm.credit.config.BusinessMetrics;
 import com.srm.credit.model.PaymentCurrency;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.util.concurrent.TimeUnit;

@@ -1,0 +1,12 @@
+{
+  "http-latencies.csv": {
+    "sha256": "99f1a116a3b5f808c0844d6a59d3208aad109637c385b2d9f2338de77ac9fe85",
+    "bytes": 4755555,
+    "preserved_as": "http-latencies.csv.gz"
+  },
+  "resource-samples.ndjson": {
+    "sha256": "5509e858d52099652aacd8c501772c945f1d85a5a79922bf02c300ac97c12855",
+    "bytes": 75722139,
+    "preserved_as": "resource-samples.ndjson.gz"
+  }
+}

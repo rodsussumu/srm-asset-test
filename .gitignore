@@ -22,3 +22,11 @@ test-results.xml
 
 # Local logs
 *.log
+
+# Python tools
+__pycache__/
+*.py[cod]
+
+# Large benchmark raw data stays local; compressed evidence is selected explicitly.
+/docs/evidence/constrained-100k/**/http-latencies.csv
+/docs/evidence/constrained-100k/**/resource-samples.ndjson

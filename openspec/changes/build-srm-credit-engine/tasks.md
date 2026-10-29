@@ -62,9 +62,9 @@ Executar por etapas, com uma branch por funcionalidade e pull request para main.
 
 ## 8. Validação integrada e preparação da defesa
 
-- [ ] 8.1 Executar smoke completo em ambiente limpo: autenticação, cadastro, simulação, liquidação BRL/USD, retry e consulta do extrato; verificar resultado e registrar evidência sem depender de edição manual do banco.
-- [ ] 8.2 Executar aferição com 10 clientes e ao menos 1000 requisições por rota após aquecimento; registrar hardware, comandos, erros e p95 contra alvos de 300 ms na simulação e 500 ms no extrato, explicando qualquer divergência.
-- [ ] 8.3 Revisar rastreabilidade entre specs, testes e documentação; verificar ausência de alegações não aferidas e preparar roteiro de walkthrough de 10 minutos com demonstração de concorrência e extensão por strategy.
+- [x] 8.1 Executar smoke completo em ambiente limpo: autenticação, cadastro, simulação, liquidação BRL/USD, retry e consulta do extrato; verificar resultado e registrar evidência sem depender de edição manual do banco.
+- [x] 8.2 Executar aferição de referência com 10 clientes e ao menos 1000 requisições por rota; acrescentar cenário com orçamento agregado de 2 CPUs/4 GiB, 100000 medidas (50000 por rota) após aquecimento, cotas efetivas e coleta de recursos; registrar hardware, comandos, erros e p95 contra alvos 300/500 ms, preservando tentativas interrompidas e explicando limitações.
+- [x] 8.3 Revisar rastreabilidade entre specs, testes e documentação; verificar ausência de alegações não aferidas e preparar roteiro de walkthrough de 10 minutos com demonstração de concorrência e extensão por strategy.
 
 ## Workflow follow-up
 

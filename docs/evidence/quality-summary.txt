@@ -1,0 +1,7 @@
+Validação local final — 29/10/2026
+Backend: spotless:apply clean verify, Java 21.0.8, PostgreSQL 17.11/Testcontainers
+{'tests': 198, 'failures': 0, 'errors': 0, 'skipped': 0}
+JaCoCo: {'BRANCH': {'covered': 226, 'missed': 36}, 'LINE': {'covered': 977, 'missed': 29}}
+Todos os gates gerais/financeiros aprovados, sem exclusões de produção.
+Angular: Node 22.16.0, lint e 48 testes, JUnit XML gerado sem falhas/erros.
+Builds backend/frontend: imagens construídas por Compose; backend package sem teste no builder, suíte completa separada acima.

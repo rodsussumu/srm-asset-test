@@ -1,6 +1,6 @@
 # SRM Credit Engine — especificação
 
-**Estado:** premissas definidas antes do código; blocos 2 a 7 implementados, incluindo painel, observabilidade, Compose e documentação; validação final, aferição HTTP e walkthrough do bloco 8 pendentes. Stack: Java/Spring Boot, Angular e PostgreSQL. Cenários detalhados nas [seis specs](openspec/changes/build-srm-credit-engine/specs/).
+**Estado:** premissas definidas antes do código; blocos 2 a 8 implementados e validados localmente, incluindo smoke BRL/USD, aferição HTTP e roteiro de defesa. CI remota, aceite comercial e defesa humana não foram aferidos. Stack: Java/Spring Boot, Angular e PostgreSQL. Cenários detalhados nas [seis specs](openspec/changes/build-srm-credit-engine/specs/).
 
 ## Escopo e premissas
 
@@ -44,7 +44,7 @@ Golden cases obrigatórios, com base de 1% a.m. e prazo inteiro:
 - Extrato: filtros período/cedente/moeda, intervalo UTC [início, fim) de até 366 dias; paginação padrão 20/máximo 100; contagem e totais por moeda no mesmo snapshot da página.
 - Operação: Compose, ER/C4 1 e 2, logs JSON correlacionados e métricas de confirmações pós-commit/latência. CI com testes, lint e build, incluindo PostgreSQL real e Angular.
 - Cobertura: backend 80% linhas/70% branches; cada classe financeira e strategy 95%/90%, bloqueados por JaCoCo.
-- Desempenho: aferir p95 ≤300 ms na simulação e ≤500 ms no extrato com 10000 títulos/5000 liquidações, 10 clientes e ≥1000 medidas por rota após aquecimento; ambiente com ≥4 vCPUs/8 GB. Registrar resultados reais, sem garantia de produção.
+- Desempenho: aferir p95 ≤300 ms na simulação e ≤500 ms no extrato com 10000 títulos/5000 liquidações, 10 clientes e ≥1000 medidas por rota após aquecimento; ambiente com ≥4 vCPUs/8 GB. Registrar resultados reais, sem garantia de produção. Cenário adicional escolhido pelo autor: 2 CPUs/4 GiB agregados e 100000 medidas (50000 por rota), 10 clientes e 1000 de aquecimento/rota, com cotas/recursos e tentativas preservadas.
 
 ## Perguntas e cortes
 

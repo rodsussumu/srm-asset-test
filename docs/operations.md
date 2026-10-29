@@ -75,3 +75,7 @@ A verificação operacional retornou exit 0: o login SQL real srm_app mostrou co
 Com PostgreSQL parado, readiness retornou 503 com apenas status DOWN, liveness continuou 200 e a readiness recuperou após start. Os logs reais mostraram JSON/UTC, outcome, correlação e identificadores de auditoria, exatamente dois eventos de confirmação e ausência dos canários/senhas externas testados. [Saída da execução](evidence/operational-checks.txt).
 
 Não houve alteração do .env ou volumes habituais. Esses checks não medem p95 nem comprovam CI/deploy remotos. O bloco 8 permanece responsável pela validação final, aferição e walkthrough. [Qualidade](quality.md).
+
+## Validação final
+
+O bloco 8 repetiu o fluxo em novo volume limpo e conferiu a SPA no navegador; a aferição usou outro projeto/volume. Consulte [smoke](smoke.md), [desempenho](performance.md) e [roteiro](walkthrough.md). Os projetos descartáveis foram encerrados com seus volumes removidos, preservando os ambientes habituais.

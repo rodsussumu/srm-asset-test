@@ -1,0 +1,46 @@
+[
+  {
+    "BlockIO": "204MB / 4.1kB",
+    "CPUPerc": "16.12%",
+    "Container": "ab402d97601edd68e2bce39a21acb8ccafaa91b541addbb50bb14c6d57d2eb5f",
+    "ID": "ab402d97601edd68e2bce39a21acb8ccafaa91b541addbb50bb14c6d57d2eb5f",
+    "MemPerc": "22.83%",
+    "MemUsage": "467.6MiB / 2GiB",
+    "Name": "srm-constrained-backend-1",
+    "NetIO": "515MB / 998MB",
+    "PIDs": "39"
+  },
+  {
+    "BlockIO": "8.18MB / 913kB",
+    "CPUPerc": "3.63%",
+    "Container": "bedf665bf280768a3129168390185bdc50c152bafaa9a6f84ac3aa3e4f5a3798",
+    "ID": "bedf665bf280768a3129168390185bdc50c152bafaa9a6f84ac3aa3e4f5a3798",
+    "MemPerc": "2.60%",
+    "MemUsage": "6.648MiB / 256MiB",
+    "Name": "srm-constrained-frontend-1",
+    "NetIO": "959MB / 976MB",
+    "PIDs": "9"
+  },
+  {
+    "BlockIO": "16.9MB / 0B",
+    "CPUPerc": "9.90%",
+    "Container": "2c24f4ee418176540ab4a9b96de34898cab6dc80b95c946334894c867af69eb9",
+    "ID": "2c24f4ee418176540ab4a9b96de34898cab6dc80b95c946334894c867af69eb9",
+    "MemPerc": "9.67%",
+    "MemUsage": "24.75MiB / 256MiB",
+    "Name": "srm-constrained-fx-mock-1",
+    "NetIO": "2.98kB / 847B",
+    "PIDs": "2"
+  },
+  {
+    "BlockIO": "52.9MB / 168MB",
+    "CPUPerc": "49.96%",
+    "Container": "295475294deb83fd5ae4f27b7b669836d6e356885f5db134888eae31672bd179",
+    "ID": "295475294deb83fd5ae4f27b7b669836d6e356885f5db134888eae31672bd179",
+    "MemPerc": "3.81%",
+    "MemUsage": "58.51MiB / 1.5GiB",
+    "Name": "srm-constrained-postgres-1",
+    "NetIO": "85.3MB / 434MB",
+    "PIDs": "16"
+  }
+]

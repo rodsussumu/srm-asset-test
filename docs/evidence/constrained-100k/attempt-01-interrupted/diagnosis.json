@@ -1,0 +1,13 @@
+{
+  "attempt": "01",
+  "valid_performance_comparison": false,
+  "load_exit_code": 1,
+  "simulation_errors": 0,
+  "statement_errors": 33335,
+  "error_breakdown": {
+    "transport_or_json": 33195,
+    "http_401": 140
+  },
+  "observation": "Resource sampling has repeated gaps near 15 minutes; macOS pmset log confirms Sleep/DarkWake during the run. No container restart/OOM was recorded. Session expiry is consistent with the prolonged duration. This does not establish that every transport failure was caused by sleep.",
+  "repeat_reason": "Repeat in a fresh disposable database, same quotas, with temporary idle-sleep inhibition and a 900-second global runtime bound; preserve both attempts."
+}

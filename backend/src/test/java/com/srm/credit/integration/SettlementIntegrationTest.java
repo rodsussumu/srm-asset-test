@@ -1,4 +1,4 @@
-package com.srm.credit;
+package com.srm.credit.integration;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;

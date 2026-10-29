@@ -1,4 +1,4 @@
-package com.srm.credit;
+package com.srm.credit.controller;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
@@ -8,7 +8,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.srm.credit.config.CorrelationFilter;
 import com.srm.credit.config.SecurityConfig;
-import com.srm.credit.controller.AuthController;
 import com.srm.credit.exception.ErrorResponses;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

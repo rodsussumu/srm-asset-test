@@ -1,0 +1,73 @@
+{
+  "routes": {
+    "simulation": {
+      "requests": 50000,
+      "errors": 0,
+      "p95_ms": 60.923,
+      "p99_ms": 75.144,
+      "phase_seconds": 38.65,
+      "requests_per_second_including_setup": 1293.66
+    },
+    "statement": {
+      "requests": 50000,
+      "errors": 0,
+      "p95_ms": 94.195,
+      "p99_ms": 99.515,
+      "phase_seconds": 164.719,
+      "requests_per_second_including_setup": 303.55
+    }
+  },
+  "resources": {
+    "backend": {
+      "cpu_core_seconds_delta": 101.506,
+      "periods_delta": 2168,
+      "throttled_periods_delta": 403,
+      "throttled_periods_percent": 18.59,
+      "memory_peak_lifetime_bytes": 529203200,
+      "oom_delta": 0,
+      "oom_kill_delta": 0,
+      "restart_count_after": 0
+    },
+    "postgres": {
+      "cpu_core_seconds_delta": 86.694,
+      "periods_delta": 2105,
+      "throttled_periods_delta": 1654,
+      "throttled_periods_percent": 78.57,
+      "memory_peak_lifetime_bytes": 190562304,
+      "oom_delta": 0,
+      "oom_kill_delta": 0,
+      "restart_count_after": 0
+    },
+    "frontend": {
+      "cpu_core_seconds_delta": 14.883,
+      "periods_delta": 2111,
+      "throttled_periods_delta": 225,
+      "throttled_periods_percent": 10.66,
+      "memory_peak_lifetime_bytes": 17108992,
+      "oom_delta": 0,
+      "oom_kill_delta": 0,
+      "restart_count_after": 0
+    },
+    "fx-mock": {
+      "cpu_core_seconds_delta": 7.766,
+      "periods_delta": 851,
+      "throttled_periods_delta": 756,
+      "throttled_periods_percent": 88.84,
+      "memory_peak_lifetime_bytes": 34181120,
+      "oom_delta": 0,
+      "oom_kill_delta": 0,
+      "restart_count_after": 0
+    }
+  },
+  "sampler_limitation": "Streaming samples omitted the backend because ANSI prefixes were not stripped; backend has cgroup before/after counters and a separate point sample. The parser was corrected after this run, without rerunning the workload.",
+  "http-latencies.csv": {
+    "uncompressed_sha256": "5ccdcbac3975af25b2c629e7849dafa8b453a0a6cbe760d6271e1fc24dc233df",
+    "bytes": 3935543,
+    "gzip_bytes": 675076
+  },
+  "resource-samples.ndjson": {
+    "uncompressed_sha256": "e293cb05f495470b0bf36cbce19c204ca6551fc26ed0f680ec2c1b1f1fe45553",
+    "bytes": 500883,
+    "gzip_bytes": 18551
+  }
+}

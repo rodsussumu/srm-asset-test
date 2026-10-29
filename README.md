@@ -4,7 +4,7 @@ Plataforma de cessão de crédito com Java/Spring Boot MVC, Angular e PostgreSQL
 
 ## Estado e documentos
 
-Blocos 2 a 7 implementados: motor decimal, cadastro, câmbio, liquidação, extrato, sessão/painel, observabilidade e Compose completo. A validação local inclui 197 testes backend, 48 Angular e verificações operacionais de falha do provedor/banco. O bloco 8 ainda reúne smoke final, aferição HTTP/p95, rastreabilidade e walkthrough. Execução local não comprova CI ou deploy remotos.
+Blocos 2 a 8 implementados e validados localmente: motor decimal, cadastro, câmbio, liquidação, extrato, sessão/painel, observabilidade e Compose completo. São 198 testes backend e 48 Angular, smoke final BRL/USD e aferição HTTP. Execução local não comprova CI/deploy remotos ou defesa humana realizada.
 
 - [SPEC](SPEC.md): premissas, precisão, golden cases e critérios de aceite.
 - [DECISIONS](DECISIONS.md): escolhas e cortes; [REVIEW](REVIEW.md): análise priorizada do Anexo A; [AI_USAGE](AI_USAGE.md): colaboração, erro real detectado e limites de autoria.
@@ -12,6 +12,7 @@ Blocos 2 a 7 implementados: motor decimal, cadastro, câmbio, liquidação, extr
 - [Motor/prazo](docs/pricing.md), [câmbio](docs/currency.md), [liquidação/retry](docs/settlements.md) e [extrato/planos SQL](docs/statements.md).
 - [Sessão](docs/authentication.md), [painel](docs/workspace.md), [API](docs/api.md), [erros](docs/errors.md) e [credenciais do banco](docs/database.md).
 - [Operação/diagnóstico](docs/operations.md), [observabilidade](docs/observability.md) e [testes/cobertura](docs/quality.md).
+- [Smoke final](docs/smoke.md), [aferição HTTP](docs/performance.md), [matriz de rastreabilidade](docs/traceability.md) e [roteiro de defesa de 10 minutos](docs/walkthrough.md).
 
 ## Rodar com Docker Compose
 
@@ -115,4 +116,18 @@ openspec instructions apply --change build-srm-credit-engine --json
 openspec validate build-srm-credit-engine --strict
 ```
 
-[Proposta](openspec/changes/build-srm-credit-engine/proposal.md), [desenho](openspec/changes/build-srm-credit-engine/design.md), [tasks](openspec/changes/build-srm-credit-engine/tasks.md) e [seis specs](openspec/changes/build-srm-credit-engine/specs/). O bloco 8 permanece pendente; a mudança ainda não deve ser arquivada.
+[Proposta](openspec/changes/build-srm-credit-engine/proposal.md), [desenho](openspec/changes/build-srm-credit-engine/design.md), [tasks](openspec/changes/build-srm-credit-engine/tasks.md) e [seis specs](openspec/changes/build-srm-credit-engine/specs/). Os 39 itens foram concluídos localmente. Revise a entrega e solicite arquivamento OpenSpec quando apropriado; publicação da PR e defesa são passos separados.
+
+## Validação final local
+
+Em 29/10/2026, 10 clientes com sessões independentes executaram 200 requisições de aquecimento e 1000 medidas por rota pelo nginx, com 10000 títulos/5000 liquidações. Sem erros: p95 16,628 ms na simulação (alvo 300 ms) e 17,311 ms no extrato (alvo 500 ms). O CSV de 2000 amostras foi auditado; host M2/8 CPUs/24 GiB, Docker com 8 CPUs e cerca de 11,7 GiB. É medição local curta e aquecida, sem representar capacidade/SLA de produção. [Método, reprodução e limites](docs/performance.md).
+
+O [smoke](docs/smoke.md) criou registros BRL/USD via HTTP em outro volume limpo, verificou replays e dependências, e confirmou uma nova operação USD pelo Angular no Chrome. O teste StrategyExtensionTest e o roteiro demonstram a extensão do spread sem duplicar fórmula; não foi introduzido um terceiro tipo em produção. A matriz cobre 32 requisitos e 60 cenários das seis specs, com limites remotos/humanos explícitos.
+
+Os arquivos selecionados em docs/evidence são evidências intencionais da validação. Artefatos de build, dependências, logs, .env, relatórios temporários e caches Python ficam no .gitignore. O gitignore não retira arquivos já rastreados automaticamente; a auditoria não encontrou arquivos rastreados abrangidos pelas regras atuais.
+
+## Cenário adicional: 2 CPUs/4 GiB e 100 mil requisições
+
+O autor escolheu reduzir o orçamento agregado dos quatro serviços e medir 50 mil requisições por rota com dez clientes. O perfil compose.benchmark.yaml limita backend, PostgreSQL, nginx e mock a uma soma de 2 CPUs/4 GiB. A tentativa contínua concluiu 100 mil HTTP 200, sem erros: p95 60,923 ms na simulação e 94,195 ms no extrato. Sem OOM/reinícios; houve throttling de CPU. A referência original foi preservada.
+
+Uma primeira tentativa atravessou suspensões do host, teve timeouts/401 e foi mantida como execução interrompida, não como comparação válida. O relatório também explicita a omissão do backend nas amostras contínuas pelo parser original, sua correção e os contadores cgroup disponíveis para todos os serviços. [Método, cotas, resultados, falhas e reprodução](docs/performance-constrained.md). As cotas não equivalem a uma VM exclusiva e o resultado não representa capacidade de produção.

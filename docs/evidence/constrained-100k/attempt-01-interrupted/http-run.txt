@@ -1,0 +1,12 @@
+warmup simulation {"requests": 1000, "errors": 0, "min_ms": 2.533, "mean_ms": 57.982, "p50_ms": 75.533, "p95_ms": 114.758, "max_ms": 492.838} elapsed_seconds 7.426
+measured simulation {"requests": 50000, "errors": 0, "min_ms": 0.37, "mean_ms": 7.482, "p50_ms": 2.327, "p95_ms": 61.836, "max_ms": 580.221} elapsed_seconds 40.72
+warmup statement {"requests": 1000, "errors": 0, "min_ms": 1.137, "mean_ms": 28.585, "p50_ms": 6.399, "p95_ms": 95.442, "max_ms": 291.537} elapsed_seconds 4.363
+measured statement {"requests": 50000, "errors": 33335, "min_ms": 0.618, "mean_ms": 6651.05, "p50_ms": 10002.344, "p95_ms": 10005.496, "max_ms": 10013.763} elapsed_seconds 36336.289
+Traceback (most recent call last):
+  File "/Users/rodrigo/Documents/projects/srm-asset-test/scripts/benchmark/http-load.py", line 176, in <module>
+    main()
+    ~~~~^^
+  File "/Users/rodrigo/Documents/projects/srm-asset-test/scripts/benchmark/http-load.py", line 170, in main
+    assert all(result['errors'] == 0 for result in report['routes'].values()), 'Measured request errors; inspect the report'
+           ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Measured request errors; inspect the report

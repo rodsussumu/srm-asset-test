@@ -1,0 +1,35 @@
+{
+  "recorded_on": "2026-10-29",
+  "host": {
+    "cpu": "Apple M2",
+    "logical_cpus": 8,
+    "physical_cpus": 8,
+    "memory_bytes": 25769803776,
+    "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O"
+  },
+  "docker": {
+    "available_cpus": 8,
+    "available_memory_bytes": 12591218688,
+    "os": "linux",
+    "architecture": "aarch64"
+  },
+  "runtime": {
+    "java_container": "Temurin 21.0.12.1+1-LTS",
+    "postgresql": "17.11 aarch64-unknown-linux-musl",
+    "spring_boot": "3.5.16",
+    "angular": "21.2.0",
+    "python_driver": "3.14.7"
+  },
+  "resources_source": "sysctl -n hw.ncpu hw.physicalcpu hw.memsize machdep.cpu.brand_string; docker info --format fields NCPU MemTotal OSType Architecture; backend java -version; postgres SELECT version()",
+  "project": "srm-new-task8-bench",
+  "ports": {
+    "postgres": 55449,
+    "backend": 18089,
+    "frontend": 14209,
+    "fx_mock": 18099
+  },
+  "git_head": "dc6c56220db0eccfe0e8e09396be73f424f7d53d",
+  "fixture_sha256": "3eb1e0890e99dab83d2806276267fee49cb6df49625e7d4821507e0cef60230e",
+  "driver_sha256": "0f1130737a1575ee8749c9934f7703f90457747254844d0c3b6519fee40dcec0",
+  "limitations": "Shared local host, no per-container CPU/memory reservation; smoke project removed before measurement; no production throughput guarantee."
+}

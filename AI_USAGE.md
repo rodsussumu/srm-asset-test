@@ -13,11 +13,11 @@ A stack, a arquitetura MVC, a sequência de trabalho e o fluxo de branches/PRs f
 ## Evidências e estado atual
 
 - Prompts estratégicos de implementação e sua finalidade, sem transcrever sessões inteiras.
-- Erro concreto detectado no bloco 3: omissão do 200 no OpenAPI de FX; teste de contrato falhou antes da correção. [Extrato do log original](docs/evidence/openapi-regression.txt) e [teste preservado](backend/src/test/java/com/srm/credit/FxIntegrationTest.java).
+- Erro concreto detectado no bloco 3: omissão do 200 no OpenAPI de FX; teste de contrato falhou antes da correção. [Extrato do log original](docs/evidence/openapi-regression.txt) e [teste preservado](backend/src/test/java/com/srm/credit/integration/FxIntegrationTest.java).
 - Resultados reais de golden cases, concorrência, rollback, retry e verificações da interface.
 - Decisões aceitas, corrigidas ou rejeitadas pelo autor ao longo das etapas.
 
-Os relatos abaixo registram o estado de cada etapa. Atualmente há testes backend/Angular e verificações operacionais locais; smoke final, aferição HTTP e defesa ao vivo permanecem pendentes.
+Os relatos abaixo registram o estado de cada etapa. Atualmente há testes backend/Angular, smoke final e aferição HTTP locais; defesa ao vivo, aceite comercial e execução remota da CI atual permanecem sem evidência.
 
 ## Estrutura inicial — 28/10/2026
 
@@ -94,3 +94,23 @@ O caso concreto de erro da IA permanece o observado no bloco 3: a primeira anota
 Decisões mantidas pelo autor: Java/Angular/PostgreSQL, MVC com camadas criadas junto das features, sequência specs → estrutura → blocos e integração por branches/PRs. Não se delegam à IA a aprovação comercial das premissas, autorização para publicação/convites, aceite final ou a capacidade de explicar/modificar o próprio código na defesa. A revisão humana final continua sob responsabilidade do autor; este relatório não afirma que ela já ocorreu.
 
 A IA auxiliou implementação, análise do Anexo A e verificação; a geração dos documentos não substitui avaliação humana. CI remota desta branch, smoke final, aferição HTTP e walkthrough permanecem explicitamente pendentes. O ambiente habitual foi preservado.
+
+## Validação final — 29/10/2026
+
+Após o autor informar o merge da PR #8 e autorizar a próxima etapa, a branch test/final-validation partiu da main dc6c562. O escopo foi 8.1–8.3: smoke limpo BRL/USD, aferição HTTP reproduzível e rastreabilidade/roteiro de defesa. Nenhum resultado anterior foi apresentado como nova execução.
+
+O verificador HTTP criou registros por API em banco limpo; o navegador confirmou mais uma operação USD e conferiu extrato, recarga/filtro/logout. A aferição usou outro volume, fixture determinístico 10000/5000 e cotação atual sincronizada pela API. O driver usa 10 sessões/CSRF e conexões independentes, 200 requisições de aquecimento e 1000 medidas por rota, sem retry. CSV, metadados e percentis recalculados registram erro zero, p95 16,628/17,311 ms; isso é recorte local curto, não promessa de produção.
+
+A suíte final passou com 198 testes backend, 48 Angular e os gates existentes. A fixture de strategy usa spread alternativo somente no teste e não introduz um novo tipo em produção. A matriz cobre 32 requisitos/59 cenários e o roteiro prepara 10 minutos com demonstração de concorrência e extensão. Os métodos e links citados foram conferidos. O .gitignore foi complementado para caches Python; resultados selecionados em docs/evidence são evidências intencionais.
+
+O erro real de OpenAPI detectado no bloco 3 continua documentado com o log original e a asserção de regressão, sem fabricar outro defeito. Stack/MVC, sequência e autorização de publicação permaneceram decisões do autor. A aprovação comercial, revisão humana final e defesa continuam responsabilidade humana. Os 39 itens locais concluídos não atestam CI remota, convites, aceite do negócio ou defesa realizada.
+
+## Ampliação do ensaio de desempenho — 29/10/2026
+
+O autor pediu cenário menor e carga maior e confirmou duas escolhas: 2 CPUs/4 GiB para todo o conjunto e 100 mil medidas totais (50 mil por rota). A IA preparou o override de Compose e o observador, sem trocar a referência nem alterar as regras financeiras. A primeira tentativa foi preservada: 50 mil simulações sem erro, 33335 falhas no extrato e quase 12 horas de execução com gaps de coleta. Logs de energia do host confirmaram Sleep/DarkWake; isso compromete a medição, mas não prova causa única de todas as falhas.
+
+A repetição usou banco limpo, mesmas cotas/fixture, prevenção temporária de idle sleep e timeout global de 900 s. Resultou em 100 mil HTTP 200 válidos, p95 60,923/94,195 ms, sem OOM ou reinício. CPU/memória e percentis foram auditados. Ambas as tentativas e hashes dos dados comprimidos foram mantidos.
+
+Houve outro erro real da IA no observador: json.loads aplicado diretamente ao stream descartava a primeira linha com controles ANSI, omitindo backend. A inspeção da cobertura de nomes nas amostras detectou a lacuna. O parser agora remove esses controles, registra erros e verifica quatro serviços; um replay offline de payloads reais conferiu a correção. O relatório não inventa amostras contínuas de backend: usa os contadores cgroup de todos os serviços e identifica a limitação. Não houve terceira carga para apagar a evidência.
+
+Spec central, cenário operacional, matriz (agora 32 requisitos/60 cenários) e roteiro foram alinhados. Arquivos brutos grandes permanecem ignorados; evidências selecionadas são gzip verificáveis. CI remota e defesa humana continuam sem evidência nesta etapa.

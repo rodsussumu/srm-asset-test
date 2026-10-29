@@ -1,10 +1,10 @@
-package com.srm.credit;
+package com.srm.credit.service;
 
 import static org.assertj.core.api.Assertions.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.srm.credit.exception.FxProviderUnavailableException;
-import com.srm.credit.service.FxProviderClient;
+import com.srm.credit.support.FxHttpFixture;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.Clock;
 import java.time.Duration;

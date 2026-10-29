@@ -1,0 +1,5 @@
+warmup simulation {"requests": 200, "errors": 0, "min_ms": 3.545, "mean_ms": 12.967, "p50_ms": 10.732, "p95_ms": 29.316, "max_ms": 54.047} elapsed_seconds 0.452
+measured simulation {"requests": 1000, "errors": 0, "min_ms": 1.693, "mean_ms": 8.158, "p50_ms": 7.367, "p95_ms": 16.628, "max_ms": 34.211} elapsed_seconds 1.079
+warmup statement {"requests": 200, "errors": 0, "min_ms": 4.08, "mean_ms": 16.15, "p50_ms": 14.981, "p95_ms": 31.227, "max_ms": 43.209} elapsed_seconds 0.498
+measured statement {"requests": 1000, "errors": 0, "min_ms": 1.46, "mean_ms": 9.103, "p50_ms": 8.28, "p95_ms": 17.311, "max_ms": 36.256} elapsed_seconds 1.106
+PASS local HTTP targets (not a production guarantee)

@@ -1,0 +1,4 @@
+{
+  "observer_as_run_sha256": "c7d6f851a01ceb18d58ad6d9bbc1581df7642d7e3e72db471bfc322a31efacbd",
+  "sampling_limitation": "docker stats adds ANSI control sequences to the first container line. The original streaming parser discarded that line, so samples omit backend. All four services still have cgroup CPU/memory counters and limits before/after. Parser corrected and checked separately; the workload is not rerun to hide this limitation."
+}

@@ -1,0 +1,5 @@
+ receivables_after_load | settlements_after_load 
+------------------------+------------------------
+                  10000 |                   5000
+(1 row)
+

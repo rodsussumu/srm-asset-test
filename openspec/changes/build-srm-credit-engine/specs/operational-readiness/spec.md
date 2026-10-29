@@ -57,11 +57,15 @@ A CI SHALL publicar relatórios HTML/XML de cobertura e resultados de testes por
 - **THEN** os artefatos ficam disponíveis na CI por 14 dias, com contadores e fontes navegáveis no relatório HTML
 
 ### Requirement: Critérios mensuráveis de desempenho
-A entrega SHALL medir simulação e extrato com 10000 recebíveis, 5000 liquidações, 10 clientes concorrentes e ao menos 1000 requisições por rota após aquecimento. O alvo SHALL ser p95 de até 300 ms para simulação e 500 ms para extrato, em ambiente local com ao menos 4 vCPUs e 8 GB RAM disponíveis. Hardware, comandos e resultados SHALL ser documentados.
+A entrega SHALL medir simulação/extrato com 10000 recebíveis/5000 liquidações, 10 clientes e ≥1000 medidas por rota após aquecimento, em ambiente com ≥4 vCPUs/8 GB. Os alvos SHALL ser p95 ≤300/500 ms, respectivamente. Um cenário adicional SHALL usar cotas agregadas de 2 CPUs/4 GiB e 100000 medidas (50000/rota). Hardware, comandos, cotas, erros, recursos e limitações SHALL ser registrados, preservando a referência e tentativas anteriores.
 
 #### Scenario: Aferição local
 - **WHEN** o cenário de aferição é executado com filtros e página de tamanho 20
 - **THEN** o relatório registra p95, erros, volume e ambiente, comparando resultados com os alvos sem declarar garantia de produção
+
+#### Scenario: Aferição com recursos restritos
+- **WHEN** a aplicação é medida com cotas agregadas de 2 CPUs/4 GiB, 10 clientes e 100000 requisições após 1000 de aquecimento por rota
+- **THEN** o relatório compara as duas rotas com os alvos, registra cotas efetivas, p95/erros/recursos e preserva tentativas interrompidas sem apresentá-las como comparação válida
 
 ### Requirement: Documentação específica e autoria verificável
 A entrega SHALL conter SPEC.md de 1–2 páginas anterior ao código, README, DECISIONS.md, REVIEW.md priorizado do Anexo A, AI_USAGE.md, OpenAPI e diagramas ER/C4 1 e 2. AI_USAGE.md SHALL distinguir evidências reais de itens pendentes e registrar um erro real da IA com sua detecção antes da entrega final, sem fabricar histórico.

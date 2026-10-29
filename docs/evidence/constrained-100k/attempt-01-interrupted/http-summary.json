@@ -1,0 +1,102 @@
+{
+  "started_at": "2026-10-29T05:14:45.618702+00:00",
+  "finished_at": "2026-10-29T17:10:48.779444+00:00",
+  "base_url": "http://127.0.0.1:14210",
+  "python": "3.14.7",
+  "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+  "git_head": "dc6c56220db0eccfe0e8e09396be73f424f7d53d",
+  "clients": 10,
+  "warmup_per_route": 1000,
+  "measured_per_route": 50000,
+  "method": "closed-loop; one persistent connection per client; independent session/CSRF; no automatic retries; includes response JSON validation; nearest-rank percentiles",
+  "fixture": {
+    "receivables": 10000,
+    "settlements": 5000,
+    "page": 0,
+    "size": 20
+  },
+  "routes": {
+    "simulation": {
+      "requests": 50000,
+      "errors": 0,
+      "min_ms": 0.37,
+      "mean_ms": 7.482,
+      "p50_ms": 2.327,
+      "p95_ms": 61.836,
+      "max_ms": 580.221,
+      "phase_seconds": 40.72,
+      "target_p95_ms": 300
+    },
+    "statement": {
+      "requests": 50000,
+      "errors": 33335,
+      "min_ms": 0.618,
+      "mean_ms": 6651.05,
+      "p50_ms": 10002.344,
+      "p95_ms": 10005.496,
+      "max_ms": 10013.763,
+      "phase_seconds": 36336.289,
+      "target_p95_ms": 500
+    }
+  },
+  "groups": {
+    "simulation": {
+      "BRL": {
+        "requests": 25000,
+        "errors": 0,
+        "min_ms": 0.37,
+        "mean_ms": 7.143,
+        "p50_ms": 2.192,
+        "p95_ms": 61.209,
+        "max_ms": 580.221
+      },
+      "USD": {
+        "requests": 25000,
+        "errors": 0,
+        "min_ms": 0.505,
+        "mean_ms": 7.821,
+        "p50_ms": 2.539,
+        "p95_ms": 62.397,
+        "max_ms": 578.903
+      }
+    },
+    "statement": {
+      "all": {
+        "requests": 12500,
+        "errors": 9138,
+        "min_ms": 0.618,
+        "mean_ms": 7268.745,
+        "p50_ms": 10002.573,
+        "p95_ms": 10005.485,
+        "max_ms": 10013.763
+      },
+      "assignor": {
+        "requests": 12500,
+        "errors": 7531,
+        "min_ms": 1.125,
+        "mean_ms": 6037.897,
+        "p50_ms": 10002.03,
+        "p95_ms": 10005.454,
+        "max_ms": 10012.373
+      },
+      "combined": {
+        "requests": 12500,
+        "errors": 7529,
+        "min_ms": 0.879,
+        "mean_ms": 6032.347,
+        "p50_ms": 10002.007,
+        "p95_ms": 10005.501,
+        "max_ms": 10010.838
+      },
+      "currency": {
+        "requests": 12500,
+        "errors": 9137,
+        "min_ms": 0.665,
+        "mean_ms": 7265.21,
+        "p50_ms": 10002.574,
+        "p95_ms": 10005.523,
+        "max_ms": 10013.181
+      }
+    }
+  }
+}

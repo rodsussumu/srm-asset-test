@@ -1,0 +1,22 @@
+VACUUM
+                                            version                                             
+------------------------------------------------------------------------------------------------
+ PostgreSQL 17.11 on aarch64-unknown-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit
+(1 row)
+
+ receivables | settlements 
+-------------+-------------
+       10000 |        5000
+(1 row)
+
+ payment_currency | count 
+------------------+-------
+ BRL              |  2500
+ USD              |  2500
+(2 rows)
+
+ receivables_after_load | settlements_after_load 
+------------------------+------------------------
+                  10000 |                   5000
+(1 row)
+
