@@ -1,6 +1,6 @@
 # SRM Credit Engine — especificação
 
-**Estado:** premissas definidas antes do código; estrutura inicial disponível, funcionalidades e validação financeira pendentes. Stack: Java/Spring Boot, Angular e PostgreSQL. Cenários detalhados nas [seis specs](openspec/changes/build-srm-credit-engine/specs/).
+**Estado:** premissas definidas antes do código; bloco 2 e testes/cobertura do backend implementados; demais funcionalidades pendentes. Stack: Java/Spring Boot, Angular e PostgreSQL. Cenários detalhados nas [seis specs](openspec/changes/build-srm-credit-engine/specs/).
 
 ## Escopo e premissas
 

@@ -2,7 +2,7 @@
 
 ## Context
 
-O projeto srm-asset-test possui especificação e estrutura inicial: backend Java/Spring Boot com health, frontend Angular e PostgreSQL de desenvolvimento fixado no Compose. As funcionalidades ainda não estão implementadas. A CI inicial verifica formatação/lint/build; testes funcionais e cobertura serão adicionados conforme os blocos. Motivação e limites funcionais estão em `proposal.md`; os contratos verificáveis estão nas seis specs desta mudança. O `SPEC.md` centraliza premissas e critérios de aceite. A implementação e a validação serão realizadas por blocos, com branches e pull requests.
+O projeto possui estrutura inicial e o bloco 2: cadastro/consulta de cedentes e recebíveis em MVC, motor decimal e prazo, migration V1, erros e correlação. Por orientação do usuário, a task 2.6 antecipa testes/cobertura/artefatos backend na CI; a suíte Angular permanece associada ao painel. Câmbio, liquidação, extrato e frontend funcional ainda serão implementados. Motivação e contratos estão na proposta e nas seis specs. As premissas foram definidas no SPEC antes do código.
 
 ## Goals / Non-Goals
 

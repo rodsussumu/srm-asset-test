@@ -26,8 +26,26 @@ jobs:
           distribution: temurin
           java-version-file: .java-version
           cache: maven
-      - name: Check formatting and build backend
+      - name: Test, lint, build and enforce coverage
         run: ./mvnw -B -ntp clean verify
+
+      - name: Generate coverage report after failure
+        if: failure()
+        run: ./mvnw -B -ntp jacoco:report
+      - name: Publish backend test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-test-results
+          path: backend/target/surefire-reports/
+          retention-days: 14
+      - name: Publish backend coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-coverage
+          path: backend/target/site/jacoco/
+          retention-days: 14
 
   frontend:
     runs-on: ubuntu-latest

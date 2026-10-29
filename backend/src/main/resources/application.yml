@@ -1,8 +1,38 @@
 spring:
   application:
     name: srm-credit-engine
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/srm}
+    username: ${DATABASE_USER:srm}
+    password: ${DATABASE_PASSWORD}
+  flyway:
+    user: ${MIGRATION_USER:${DATABASE_USER:srm}}
+    password: ${MIGRATION_PASSWORD:${DATABASE_PASSWORD}}
+    locations: classpath:db/migration
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+  security:
+    user:
+      name: ${APP_USERNAME:operator}
+      password: ${APP_PASSWORD}
 server:
   port: ${SERVER_PORT:8080}
+  servlet:
+    session:
+      timeout: 30m
+      cookie:
+        http-only: true
+        same-site: lax
+        secure: ${COOKIE_SECURE:false}
 management:
   endpoints:
     web:
@@ -10,4 +40,9 @@ management:
         include: health
   endpoint:
     health:
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: readinessState,db
       show-details: never

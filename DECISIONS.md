@@ -6,7 +6,7 @@ Java/Spring Boot, Angular e PostgreSQL são as escolhas do projeto. O backend se
 
 Adotar monólito: uma aquisição exige atomicidade entre estado, auditoria e idempotência. Serviços distribuídos adicionariam coordenação sem benefício neste escopo. O extrato passará por service e repository com SQL parametrizado. Strategies escolherão spreads; um único motor aplicará a fórmula. Angular usará estado local por funcionalidade, sem gerenciador global inicialmente.
 
-A estrutura fixa Java 21, Spring Boot 3.5.16, Maven 3.9.16, Angular 21.2.0, Node 22.16.0, TypeScript 5.9.2 e PostgreSQL 17.11. Dependências e compatibilidade estão em [toolchain](docs/versions.md). O backend usa apenas Web/Actuator nesta etapa; persistência, autenticação e integrações serão adicionadas junto dos respectivos casos de uso, sem desativar auto-configurações para acomodar dependências antecipadas.
+A estrutura fixa Java 21, Spring Boot 3.5.16, Maven 3.9.16, Angular 21.2.0, Node 22.16.0, TypeScript 5.9.2 e PostgreSQL 17.11. Dependências e compatibilidade estão em [toolchain](docs/versions.md). O bloco 2 acrescenta JPA, Flyway, PostgreSQL, Bean Validation, Spring Security, OpenAPI e Testcontainers para os casos de uso implementados. A autenticação inicial usa configuração externa/Basic e formulário padrão, com CSRF ativo; sessão própria e papéis vêm no bloco 6.
 
 ## Política financeira
 
@@ -28,4 +28,8 @@ GitHub Flow: branches curtas por funcionalidade e integração por pull requests
 
 ## Estado
 
-Especificações e estrutura inicial implementadas. Backend e frontend possuem build/lint; o backend inicializa sem banco e expõe health. O Compose fixa PostgreSQL para desenvolvimento, mas a aplicação ainda não usa persistência. A CI inicial executa verify/lint/build; suítes funcionais, cobertura, integração completa, desempenho e defesa continuam pendentes. O checklist OpenSpec registra o progresso. Não confundir health do processo com readiness financeira, que será implementada com a persistência.
+Bloco 2 implementado e validado localmente: motor decimal, prazo/elegibilidade, cadastro/consulta MVC, V1, precisão/constraints e erros correlacionados. O teste de versão antiga comprova o mecanismo otimista no modelo; a disputa entre liquidações permanece no bloco 4.
+
+Por orientação do usuário, testes, cobertura e relatórios do backend foram antecipados para a task 2.6. A CI usa clean verify: 74 testes locais passaram, com PostgreSQL descartável real e os golden cases. JaCoCo exige 80%/70% geral e 95%/90% por classe financeira, sem exclusões de produção. Publicação de artefatos não transforma falha em sucesso. O frontend continua com lint/build até a implementação do painel; não há suíte vazia simulando validação funcional.
+
+Flyway e aplicação ainda podem usar o mesmo login neste bloco; as credenciais segregadas e a proteção do histórico serão implantadas antes da liquidação, no bloco 4. Os testes usam banco próprio do Testcontainers e não dependem do volume Compose. Não houve execução remota da CI desta branch, smoke financeiro integrado ou aferição de desempenho. Resultados em [qualidade](docs/quality.md).

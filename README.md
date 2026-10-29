@@ -4,12 +4,15 @@ Plataforma de cessão de crédito com backend Java/Spring Boot, frontend Angular
 
 ## Estado
 
-Estrutura inicial disponível: backend Spring Boot com health, frontend Angular com página inicial, PostgreSQL de desenvolvimento via Compose e CI de formatação/lint/build. O backend ainda não acessa o banco. Cadastro, cálculo, câmbio, liquidação e autenticação serão implementados nos próximos blocos; ainda não existem testes de negócio.
+Bloco 2 implementado: cadastro/consulta de cedentes e recebíveis, motor financeiro decimal, strategies DUPLICATA/CHEQUE, política de prazo, migration e erros correlacionados. O backend segue MVC com camadas concretas. C1/C2/C3 e integrações PostgreSQL passaram localmente; o frontend permanece no esqueleto.
+
+A CI executa testes, lint, build e cobertura do backend, com relatórios por 14 dias. Câmbio/simulação HTTP, liquidação, extrato e painel funcional serão implementados nos próximos blocos. A autenticação provisória usa o usuário externo do Spring Security e CSRF; o fluxo próprio de sessão/papéis pertence ao bloco 6.
 
 - [SPEC.md](SPEC.md): premissas, precisão, golden cases e critérios de aceite.
 - [DECISIONS.md](DECISIONS.md): decisões de arquitetura e cortes.
 - [AI_USAGE.md](AI_USAGE.md): colaboração com IA e evidências pendentes.
 - [Arquitetura MVC](docs/architecture.md): responsabilidades das camadas.
+- [Motor e prazo](docs/pricing.md), [API](docs/api.md), [erros](docs/errors.md), [ER](docs/er.md) e [testes/cobertura](docs/quality.md).
 - [Proposta](openspec/changes/build-srm-credit-engine/proposal.md), [desenho](openspec/changes/build-srm-credit-engine/design.md) e [tasks](openspec/changes/build-srm-credit-engine/tasks.md).
 
 Java/Spring Boot oferece tipagem forte, transações e segurança; Angular organiza formulário, HTTP e estado tipados; PostgreSQL fornece precisão decimal, integridade referencial e transações ACID. Um monólito permite confirmar cada aquisição em uma única transação, sem coordenação entre serviços.
@@ -36,14 +39,24 @@ Exemplos de branches: docs/project-specifications, chore/initial-structure e fea
 
 Use Java 21 e Node 22.16.0, conforme [.java-version](.java-version), [.nvmrc](.nvmrc) e [toolchain](docs/versions.md). Com nvm instalado, `nvm install` e `nvm use` na raiz selecionam o Node. Confirme `java -version` e ajuste JAVA_HOME para Java 21.
 
-Backend, em um terminal:
+Primeira execução, na raiz:
 
 ```sh
+cp .env.example .env
+# Ajuste DATABASE_PASSWORD e APP_PASSWORD no arquivo local.
+docker compose up -d --wait postgres
+set -a
+. ./.env
+set +a
 cd backend
 ./mvnw spring-boot:run
 ```
 
-Consulte [health](http://localhost:8080/actuator/health), que deve retornar `{"status":"UP"}`. A aplicação não exige banco nesta etapa. Nenhuma rota de negócio está disponível.
+Se .env já existir, acrescente APP_USERNAME/APP_PASSWORD e DATABASE_URL sem sobrescrever suas configurações. Para outra porta PostgreSQL, ajuste POSTGRES_PORT e a porta em DATABASE_URL. O Spring Boot iniciado pelo Maven não carrega .env automaticamente; exportar as variáveis no mesmo terminal é necessário.
+
+Consulte [health](http://localhost:8080/actuator/health). O backend agora exige PostgreSQL e credenciais externas. Flyway aplica V1 e Hibernate valida o schema; esta etapa usa o mesmo usuário para migration/execução. A separação e as permissões restritas serão implementadas no bloco 4.
+
+[Swagger UI](http://localhost:8080/swagger-ui/index.html) e [OpenAPI JSON](http://localhost:8080/v3/api-docs) exigem autenticação. O formulário padrão em /login permite entrar com APP_USERNAME/APP_PASSWORD; HTTP Basic também está disponível. Mutações exigem token CSRF da sessão, inclusive quando usam Basic. [Contrato e limites desta etapa](docs/api.md).
 
 Frontend, em outro terminal:
 
@@ -55,16 +68,7 @@ npm start
 
 Abra [localhost:4200](http://localhost:4200). A página informa o estado inicial do projeto. O proxy de desenvolvimento encaminha /api para localhost:8080; esses endpoints serão implementados nos próximos blocos. Para portas ocupadas, use `SERVER_PORT=8081 ./mvnw spring-boot:run` e `npm start -- --port 4201`; ajuste o proxy quando a API for integrada.
 
-PostgreSQL de desenvolvimento, opcional enquanto não há persistência:
-
-```sh
-cp .env.example .env
-# Ajuste a senha e POSTGRES_PORT antes de iniciar.
-docker compose up -d --wait postgres
-docker compose down
-```
-
-O Compose contém somente PostgreSQL nesta etapa, com healthcheck e volume persistente. `down` preserva os dados. Não apague um volume para solucionar migrações futuras. Credenciais de migração/execução e orquestração completa serão adicionadas nos blocos previstos.
+O Compose contém PostgreSQL, com healthcheck e volume persistente; backend/frontend ainda iniciam pelos comandos acima. Na raiz, `docker compose down` encerra o banco preservando os dados. Não apague volumes para solucionar migrations. A orquestração completa será adicionada no bloco 7.
 
 ## Verificações e CI
 
@@ -84,9 +88,9 @@ npm run lint
 npm run build
 ```
 
-O verify inclui Spotless check e empacotamento do JAR executável. Ainda não existem testes Java; Maven informa `No tests to run`. ESLint e Prettier verificam o frontend, e Angular compila em modo estrito. O script npm test está preparado para os testes que acompanharão as funcionalidades; não faz parte desta CI inicial porque ainda não há casos.
+O verify inclui Spotless, 74 testes, integração em PostgreSQL real por Testcontainers, JAR e critérios JaCoCo. Docker deve estar ativo: falha ao acessá-lo reprova a suíte, sem substituir o banco por H2. ESLint/Prettier e build estrito continuam no frontend; testes Angular acompanharão as funcionalidades do painel.
 
-O [workflow](.github/workflows/ci.yml) executa esses comandos, sem ignorar falhas. Testes financeiros, integração PostgreSQL, cobertura mínima e artefatos serão acrescentados nos blocos correspondentes. A [validação local desta etapa](docs/initial-validation.md) não comprova execução no GitHub Actions.
+O [workflow](.github/workflows/ci.yml) executa esses comandos, sem ignorar falhas obrigatórias, e publica Surefire/JaCoCo por 14 dias inclusive quando há falha e arquivos disponíveis. Cobertura mínima: backend 80% linhas/70% branches; cada classe financeira e strategy 95%/90%. A verificação local atingiu 97,08%/82,56% no geral. [Resultados, critérios e teste negativo](docs/quality.md). A validação local não comprova execução remota do workflow desta branch. O [registro da estrutura inicial](docs/initial-validation.md) permanece como evidência daquela etapa.
 
 ## Planejamento OpenSpec
 
