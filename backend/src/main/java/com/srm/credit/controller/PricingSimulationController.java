@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/pricing/simulations")
 @Tag(name = "Simulação")
-@SecurityRequirement(name = "basicAuth")
+@SecurityRequirement(name = "sessionAuth")
 public class PricingSimulationController {
   private final PricingSimulationService service;
 

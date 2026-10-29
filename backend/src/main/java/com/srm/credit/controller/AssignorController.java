@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/assignors")
 @Tag(name = "Cedentes")
-@SecurityRequirement(name = "basicAuth")
+@SecurityRequirement(name = "sessionAuth")
 public class AssignorController {
   private final AssignorService service;
 

@@ -4,9 +4,9 @@ Plataforma de cessão de crédito com backend Java/Spring Boot, frontend Angular
 
 ## Estado
 
-Blocos 2 a 5 implementados: cadastro/consulta, motor decimal, câmbio/simulação, liquidação idempotente/auditável e extrato SQL com filtros, paginação e totais por moeda, com credencial de banco restrita. O backend segue MVC com camadas concretas. C1/C2/C3 e integrações PostgreSQL passaram localmente; o frontend permanece no esqueleto.
+Blocos 2 a 6 implementados: cadastro/consulta, motor decimal, câmbio/simulação, liquidação idempotente/auditável e extrato SQL com filtros, paginação e totais por moeda, com credencial de banco restrita. O backend segue MVC com camadas concretas. C1/C2/C3 e integrações PostgreSQL passaram localmente. O painel Angular permite login/logout, cadastro, simulação, confirmação e consulta de recebíveis/extrato.
 
-A CI executa testes, lint, build e cobertura do backend, com relatórios por 14 dias. O painel Angular funcional será implementado no bloco 6. A autenticação provisória usa uma conta externa do Spring Security e CSRF; APP_ROLES seleciona OPERATOR (padrão) ou ADMIN. A gestão cambial já exige ADMIN; contas separadas e fluxo próprio de sessão pertencem ao bloco 6.
+A CI executa testes, lint, build e cobertura do backend, com relatórios por 14 dias. O frontend executa lint, 48 testes e build na CI. A autenticação usa sessão HttpOnly/SameSite=Lax, CSRF e duas contas externas: OPERATOR e ADMIN (também operador). [Sessão e acesso](docs/authentication.md) e [painel](docs/workspace.md).
 
 - [SPEC.md](SPEC.md): premissas, precisão, golden cases e critérios de aceite.
 - [DECISIONS.md](DECISIONS.md): decisões de arquitetura e cortes.
@@ -33,7 +33,7 @@ Java/Spring Boot oferece tipagem forte, transações e segurança; Angular organ
 
 Adotar GitHub Flow: branches curtas por funcionalidade a partir da main, commits atômicos em inglês no formato Conventional Commits e integração por pull request. O fluxo mantém as mudanças revisáveis sem branches permanentes adicionais. Implementações não devem ser feitas diretamente na main.
 
-Exemplos de branches: docs/project-specifications, chore/initial-structure e feat/receivable-pricing. Cada PR deve explicar o problema, a decisão e a validação real, conforme o [template](.github/pull_request_template.md). A CI valida pushes na main e pull requests, com jobs separados para backend e frontend. As suítes funcionais serão incluídas com as features; execução remota ainda não foi comprovada.
+Exemplos de branches: docs/project-specifications, chore/initial-structure e feat/receivable-pricing. Cada PR deve explicar o problema, a decisão e a validação real, conforme o [template](.github/pull_request_template.md). A CI valida pushes na main e pull requests, com jobs separados para backend e frontend. As suítes backend e Angular acompanham as funcionalidades; a execução remota desta branch ainda não foi verificada.
 
 ## Executar localmente
 
@@ -43,7 +43,7 @@ Primeira execução, na raiz:
 
 ```sh
 cp .env.example .env
-# Ajuste MIGRATION_PASSWORD, DATABASE_PASSWORD e APP_PASSWORD.
+# Ajuste MIGRATION_PASSWORD, DATABASE_PASSWORD, APP_PASSWORD e ADMIN_PASSWORD.
 docker compose up -d --wait postgres
 docker compose run --rm -T db-bootstrap
 set -a
@@ -57,7 +57,7 @@ Se .env já existir, preserve o dono atual do banco e sua senha em MIGRATION_USE
 
 Consulte [health](http://localhost:8080/actuator/health). O backend agora exige PostgreSQL e credenciais externas. Flyway aplica V1–V5 e Hibernate valida o schema; a conexão de negócio usa DATABASE_USER/DATABASE_PASSWORD e a migração usa MIGRATION_USER/MIGRATION_PASSWORD. O bootstrap cria o login restrito; V3/V4 adicionam auditoria e proteção do histórico. Nesta demonstração a API ainda recebe ambas as credenciais ao iniciar.
 
-[Swagger UI](http://localhost:8080/swagger-ui/index.html) e [OpenAPI JSON](http://localhost:8080/v3/api-docs) exigem autenticação. O formulário padrão em /login permite entrar com APP_USERNAME/APP_PASSWORD; HTTP Basic também está disponível. Mutações exigem token CSRF da sessão, inclusive quando usam Basic. [Contrato e limites desta etapa](docs/api.md).
+[Swagger UI](http://localhost:8080/swagger-ui/index.html) e [OpenAPI JSON](http://localhost:8080/v3/api-docs) exigem autenticação. Entre pelo painel com APP_USERNAME/APP_PASSWORD ou ADMIN_USERNAME/ADMIN_PASSWORD; preserve a sessão para abrir o contrato na mesma origem (localhost:4200/swagger-ui/index.html). Mutações exigem token CSRF, inclusive login/logout. [Protocolo](docs/authentication.md). [Contrato e limites desta etapa](docs/api.md).
 
 Frontend, em outro terminal:
 
@@ -67,7 +67,7 @@ npm ci
 npm start
 ```
 
-Abra [localhost:4200](http://localhost:4200). A página informa o estado inicial do projeto. O proxy de desenvolvimento encaminha /api para localhost:8080; esses endpoints serão implementados nos próximos blocos. Para portas ocupadas, use `SERVER_PORT=8081 ./mvnw spring-boot:run` e `npm start -- --port 4201`; ajuste o proxy quando a API for integrada.
+Abra [localhost:4200](http://localhost:4200). Entre com as contas configuradas no backend. O proxy encaminha /api para localhost:8080. Para portas ocupadas, use `SERVER_PORT=8081 ./mvnw spring-boot:run` e `npm start -- --port 4201`; ajuste proxy.conf.json para a porta da API.
 
 O Compose contém PostgreSQL, db-bootstrap e mock HTTP de câmbio; backend/frontend ainda iniciam pelos comandos acima. Na raiz, `docker compose down` encerra o banco preservando os dados. Não apague volumes para solucionar migrations. A orquestração completa será adicionada no bloco 7.
 
@@ -79,13 +79,13 @@ docker compose up --build -d fx-mock
 
 O mock responde em [localhost:8090/rate](http://localhost:8090/rate), com vigência fixada ao iniciar. Ele não importa a cotação automaticamente; reiniciar o mock e sincronizar é necessário após expiração. Se alterar FX_MOCK_PORT, ajuste também FX_PROVIDER_URL para o backend no host.
 
-- POST /api/v1/fx-rates registra cotação; POST /api/v1/fx-rates/sync importa o mock. Ambos exigem ADMIN e CSRF válido. Configure APP_ROLES=ADMIN antes de iniciar/reiniciar o backend para administrar com a conta local; contas simultâneas separadas vêm no bloco 6.
+- POST /api/v1/fx-rates registra cotação; POST /api/v1/fx-rates/sync importa o mock. Ambos exigem ADMIN e CSRF válido. Entre com ADMIN_USERNAME/ADMIN_PASSWORD para administrar; a conta OPERATOR recebe 403 nessas mutações.
 - GET /api/v1/fx-rates/current seleciona a cotação local registrada e vigente mais recente, de até 24 horas. Histórico e consulta por UUID preservam os registros.
 - POST /api/v1/pricing/simulations recebe faceValue como string, dueDate, type e paymentCurrency. Retorna VP/deságio BRL, pagamento, prazo, base/spread, política, relógio e cotação quando USD, sem cadastrar recebível ou liquidação.
 
 BRL independe de câmbio; USD sem cotação local válida retorna 503 FX_RATE_UNAVAILABLE. Simulação não chama o provedor. A sincronização usa duas tentativas de 1 segundo e intervalo de 100 ms, apenas em timeout/conexão/5xx. 4xx e payload inválido não geram retry. Tentativas têm logs correlacionados e contador fx.sync.attempts, com acesso autenticado em /actuator/metrics; logs JSON e métricas de confirmações continuam no bloco 7.
 
-[Contratos e exemplos](docs/api.md), [política de câmbio, limites do mock e testes](docs/currency.md). A resposta é indicativa e não reserva preço; o recálculo na confirmação será implementado com a liquidação.
+[Contratos e exemplos](docs/api.md), [política de câmbio, limites do mock e testes](docs/currency.md). A resposta é indicativa e não reserva preço; a confirmação recalcula o preço no servidor.
 
 ## Confirmar liquidação
 
@@ -122,12 +122,13 @@ No frontend:
 ```sh
 npm ci
 npm run lint
+npm test
 npm run build
 ```
 
-O verify inclui Spotless, 190 testes, integração em PostgreSQL real por Testcontainers, JAR e critérios JaCoCo. Docker deve estar ativo: falha ao acessá-lo reprova a suíte, sem substituir o banco por H2. ESLint/Prettier e build estrito continuam no frontend; testes Angular acompanharão as funcionalidades do painel.
+O verify inclui Spotless, 195 testes, integração em PostgreSQL real por Testcontainers, JAR e critérios JaCoCo. Docker deve estar ativo: falha ao acessá-lo reprova a suíte, sem substituir o banco por H2. No frontend, 48 testes cobrem sessão, precisão, debounce/cancelamento, retry e filtros; ESLint/Prettier e build validam TypeScript e templates estritos.
 
-O [workflow](.github/workflows/ci.yml) executa esses comandos, sem ignorar falhas obrigatórias, e publica Surefire, planos SQL e JaCoCo por 14 dias inclusive quando há falha e arquivos disponíveis. Cobertura mínima: backend 80% linhas/70% branches; cada classe financeira e strategy 95%/90%. A verificação local atual atingiu 96,78%/86,97% no geral, preservando todos os limites. [Resultados, critérios e teste negativo](docs/quality.md). A validação local não comprova execução remota do workflow desta branch. O [registro da estrutura inicial](docs/initial-validation.md) permanece como evidência daquela etapa.
+O [workflow](.github/workflows/ci.yml) executa esses comandos, sem ignorar falhas obrigatórias, e publica Surefire, planos SQL e JaCoCo por 14 dias inclusive quando há falha e arquivos disponíveis. Cobertura mínima: backend 80% linhas/70% branches; cada classe financeira e strategy 95%/90%. A verificação local atual atingiu 96,95%/85,71% no geral, preservando todos os limites. [Resultados, critérios e teste negativo](docs/quality.md). A validação local não comprova execução remota do workflow desta branch. O [registro da estrutura inicial](docs/initial-validation.md) permanece como evidência daquela etapa.
 
 ## Planejamento OpenSpec
 

@@ -72,3 +72,13 @@ A validação limpa passou com 190 testes, zero falhas/erros/skips: 164 anterior
 O teste de planos carregou duas vezes o SQL sintético e preservou 10000 títulos/5000 liquidações, com 2500 pagamentos por moeda. A análise executou as strings SQL reais em PostgreSQL 17.11 aarch64, login restrito e dados aquecidos após VACUUM ANALYZE; cliente Java 21.0.8/macOS arm64 com 8 processadores disponíveis. O relatório foi copiado da execução atual para docs/statement-query-plans.txt e incluído nos artefatos de CI. Não foi reutilizado um resultado de outra execução como se fosse novo, forçado o planejador ou alegado ganho de p95 HTTP.
 
 A massa SQL é fixture de consulta: não executa confirmação nem cria resultado idempotente. Não foi carregada no Compose habitual e o .env real não foi alterado. Não foi inventado um erro novo da IA nesta etapa; os erros reais de contrato detectados nos blocos anteriores continuam documentados. CI remota desta branch, frontend funcional, observabilidade completa e smoke/aferição dos blocos seguintes permanecem pendentes.
+
+## Autenticação e painel — 29/10/2026
+
+Após o autor solicitar o próximo bloco, o merge da PR #6 foi confirmado e a branch feat/operator-workspace partiu da main atualizada. O trabalho cobriu 6.1–6.5: sessão/CSRF/papéis e painel Angular de cadastro, simulação, confirmação e extrato. Foram preservados os contratos OpenAPI explícitos e os testes financeiros existentes; testes que usavam USER genérico passaram a declarar OPERATOR, sem flexibilizar a autorização de produção.
+
+O estado foi separado dos templates, com cancelamento da requisição anterior antes do debounce da nova entrada. Dinheiro permaneceu string e o retry conserva a mesma chave/corpo em memória. PRICE_CHANGED exige novo cálculo e aceite explícito; recarga consulta dados persistidos sem reenviar intenções. A pipeline recebeu npm test.
+
+A validação local resultou em 195 testes backend, 48 Angular, lint/build e gates JaCoCo aprovados (96,95% linhas e 85,71% branches). O esbuild abortou nas tentativas dentro do sandbox; o build autorizado fora dele concluiu, sem mudança de dependências ou remoção de verificações. Isso foi registrado como limitação observada do ambiente, sem fabricar um erro de regra financeira.
+
+O navegador confirmou login de operador, cadastro por teclado, C1, liquidação BRL, extrato, recarga/consulta e logout em banco descartável separado. Evidências e identificadores estão em docs/quality.md. Não houve mudança no .env real nem nos volumes habituais. Execução remota do CI, smoke completo BRL/USD e aferição HTTP permanecem pendentes nos blocos próprios.

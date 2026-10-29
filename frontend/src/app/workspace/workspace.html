@@ -1,0 +1,425 @@
+<div class="workspace">
+  <section class="panel" aria-labelledby="operation-title">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Nova operação</p>
+        <h2 id="operation-title">Precificação de recebível</h2>
+      </div>
+      <button
+        type="button"
+        class="secondary"
+        (click)="credit.newReceivable()"
+        [disabled]="!!credit.intent() || credit.phase() === 'confirming' || credit.busy()"
+      >
+        Novo recebível
+      </button>
+    </div>
+    <p>Face em reais. Pagamento em BRL ou USD. O preço é recalculado ao confirmar.</p>
+    @if (credit.assignorsError()) {
+      <p role="alert" class="error">{{ credit.assignorsError() }}</p>
+      <button type="button" (click)="credit.loadAssignors()">Recarregar cedentes</button>
+    }
+    <form [formGroup]="credit.form" (ngSubmit)="credit.createReceivable()">
+      <fieldset [disabled]="credit.busy()">
+        <legend class="sr-only">Dados do recebível</legend>
+        <div class="form-grid">
+          <div class="field wide">
+            <label for="assignor">Cedente</label
+            ><select
+              id="assignor"
+              formControlName="assignorId"
+              aria-describedby="assignor-error"
+              [attr.aria-invalid]="!!fieldError('assignorId')"
+            >
+              <option value="">Selecione um cedente</option>
+              @for (assignor of credit.assignors(); track assignor.id) {
+                <option [value]="assignor.id">{{ assignor.name }}</option>
+              }</select
+            ><span id="assignor-error" class="error">{{ fieldError('assignorId') }}</span>
+          </div>
+          <div class="field">
+            <label for="face">Valor de face (BRL)</label
+            ><input
+              id="face"
+              type="text"
+              inputmode="decimal"
+              placeholder="100.000,00"
+              formControlName="faceValue"
+              aria-describedby="face-error"
+              [attr.aria-invalid]="!!fieldError('faceValue')"
+            /><span id="face-error" class="error">{{ fieldError('faceValue') }}</span>
+          </div>
+          <div class="field">
+            <label for="due">Vencimento</label
+            ><input
+              id="due"
+              type="date"
+              formControlName="dueDate"
+              aria-describedby="due-error"
+              [attr.aria-invalid]="!!fieldError('dueDate')"
+            /><span id="due-error" class="error">{{ fieldError('dueDate') }}</span>
+          </div>
+          <div class="field">
+            <label for="type">Tipo de título</label
+            ><select id="type" formControlName="type">
+              <option value="DUPLICATA">Duplicata</option>
+              <option value="CHEQUE">Cheque</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="currency">Moeda de pagamento</label
+            ><select id="currency" formControlName="paymentCurrency">
+              <option value="BRL">Real (BRL)</option>
+              <option value="USD">Dólar (USD)</option>
+            </select>
+          </div>
+        </div>
+      </fieldset>
+      @if (!credit.selected()) {
+        <button type="submit" [disabled]="credit.busy() || credit.form.invalid">
+          {{ credit.busy() ? 'Aguarde…' : 'Cadastrar recebível' }}
+        </button>
+      }
+    </form>
+    @if (!credit.selected()) {
+      <details>
+        <summary>Cadastrar novo cedente</summary>
+        <form (submit)="$event.preventDefault(); credit.createAssignor(assignorName.value)">
+          <div class="inline-form">
+            <div class="field">
+              <label for="assignor-name">Nome do cedente</label
+              ><input #assignorName id="assignor-name" required maxlength="200" />
+            </div>
+            <button type="submit" [disabled]="credit.busy()">Cadastrar cedente</button>
+          </div>
+        </form>
+      </details>
+    }
+    <div class="simulation" aria-live="polite" [attr.aria-busy]="credit.phase() === 'simulating'">
+      @if (credit.phase() === 'simulating') {
+        <p>Calculando preço indicativo…</p>
+      }
+      @if (credit.simulation(); as price) {
+        <div class="amounts">
+          <div>
+            <span>Valor presente · BRL</span><strong>R$ {{ money(price.presentValueBrl) }}</strong>
+          </div>
+          <div>
+            <span>Deságio · BRL</span><strong>R$ {{ money(price.discountBrl) }}</strong>
+          </div>
+          <div>
+            <span>Pagamento · {{ price.paymentCurrency }}</span
+            ><strong
+              >{{ price.paymentCurrency === 'BRL' ? 'R$' : 'US$' }}
+              {{ money(price.paymentAmount) }}</strong
+            >
+          </div>
+        </div>
+        <p class="notice">Preço indicativo. A confirmação depende do recálculo no servidor.</p>
+        <dl class="parameters">
+          <div>
+            <dt>Prazo</dt>
+            <dd>{{ price.months }} mês(es) · teto(dias / 30)</dd>
+          </div>
+          <div>
+            <dt>Base / spread mensal</dt>
+            <dd>{{ money(price.baseRate) }} / {{ money(price.spread) }}</dd>
+          </div>
+          <div>
+            <dt>Data da operação</dt>
+            <dd>{{ price.operationDate }} · São Paulo</dd>
+          </div>
+          <div>
+            <dt>Política / arredondamento</dt>
+            <dd>{{ price.policyVersion }} · {{ price.roundingMode }}</dd>
+          </div>
+        </dl>
+        @if (price.fxRate; as fx) {
+          <p>
+            Câmbio: {{ money(fx.rate) }} BRL por USD · vigência {{ instant(fx.effectiveAt) }} ·
+            {{ fx.origin }}
+          </p>
+          <p class="identifier">Cotação {{ fx.id }}</p>
+        }
+      } @else if (credit.phase() === 'editing') {
+        <p>Preencha os dados para visualizar a simulação.</p>
+      }
+    </div>
+    @if (credit.selected(); as selected) {
+      <p class="identifier">
+        Recebível {{ selected.id }} ·
+        {{ selected.status === 'AVAILABLE' ? 'Disponível' : 'Liquidado' }}
+      </p>
+      @if (selected.status === 'AVAILABLE') {
+        <div class="actions">
+          <button
+            type="button"
+            (click)="credit.confirm()"
+            [disabled]="
+              credit.phase() === 'confirming' || (!credit.intent() && credit.phase() !== 'ready')
+            "
+          >
+            {{
+              credit.phase() === 'confirming'
+                ? 'Confirmando…'
+                : credit.intent()
+                  ? 'Repetir a mesma confirmação'
+                  : 'Confirmar liquidação'
+            }}
+          </button>
+          <button
+            type="button"
+            class="secondary"
+            (click)="credit.reprice()"
+            [disabled]="!!credit.intent() || credit.phase() === 'confirming'"
+          >
+            Nova simulação
+          </button>
+        </div>
+      }
+    }
+    @if (credit.uncertain()) {
+      <p class="notice">
+        Resultado incerto. Os dados estão bloqueados para preservar a intenção. Consulte o extrato
+        ou repita a confirmação. Após recarregar esta página, consulte o recebível antes de tentar
+        liquidar.
+      </p>
+    }
+    @if (credit.message()) {
+      <p role="status" class="feedback">{{ credit.message() }}</p>
+    }
+    @if (credit.settlement(); as result) {
+      <div class="success">
+        <h3>Liquidação confirmada</h3>
+        <p class="identifier">{{ result.id }}</p>
+        <p>
+          {{ result.paymentCurrency }} {{ money(result.paymentAmount) }} ·
+          {{ instant(result.settledAt) }}
+        </p>
+      </div>
+    }
+  </section>
+  <section class="panel" aria-labelledby="receivables-title">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Retomar operação</p>
+        <h2 id="receivables-title">Recebíveis cadastrados</h2>
+      </div>
+      <button type="button" class="secondary" (click)="credit.loadReceivables()">Atualizar</button>
+    </div>
+    <p>
+      Após uma recarga ou resposta perdida, verifique o estado aqui e consulte o extrato antes de
+      repetir a operação.
+    </p>
+    <form class="inline-form" (submit)="$event.preventDefault(); credit.consult(lookup.value)">
+      <div class="field grow">
+        <label for="lookup">Consultar recebível por identificador</label
+        ><input #lookup id="lookup" type="text" placeholder="UUID do recebível" />
+      </div>
+      <button type="submit" [disabled]="!!credit.intent()">Consultar</button>
+    </form>
+    @if (credit.listLoading()) {
+      <p role="status">Carregando recebíveis…</p>
+    }
+    @if (credit.listError()) {
+      <p role="alert" class="error">{{ credit.listError() }}</p>
+    }
+    @if (credit.list(); as page) {
+      @if (page.items.length === 0) {
+        <p>Nenhum recebível encontrado.</p>
+      } @else {
+        <div class="table-scroll">
+          <table>
+            <caption class="sr-only">
+              Recebíveis cadastrados
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Identificador</th>
+                <th scope="col">Face BRL</th>
+                <th scope="col">Vencimento</th>
+                <th scope="col">Pagamento</th>
+                <th scope="col">Estado</th>
+                <th scope="col">Ação</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of page.items; track item.id) {
+                <tr>
+                  <td class="identifier">{{ item.id }}</td>
+                  <td class="numeric">{{ money(item.faceValue) }}</td>
+                  <td>{{ item.dueDate }}</td>
+                  <td>{{ item.paymentCurrency }}</td>
+                  <td>
+                    <span class="badge">{{
+                      item.status === 'AVAILABLE' ? 'Disponível' : 'Liquidado'
+                    }}</span>
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      class="secondary"
+                      (click)="credit.select(item)"
+                      [disabled]="
+                        !!credit.intent() || credit.phase() === 'confirming' || credit.busy()
+                      "
+                    >
+                      Consultar / simular
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+      <nav class="pagination" aria-label="Páginas de recebíveis">
+        <button
+          type="button"
+          class="secondary"
+          [disabled]="page.page === 0"
+          (click)="credit.loadReceivables(page.page - 1)"
+        >
+          Anterior</button
+        ><span>Página {{ page.page + 1 }} · {{ page.total }} recebível(is)</span
+        ><button
+          type="button"
+          class="secondary"
+          [disabled]="(page.page + 1) * page.size >= page.total"
+          (click)="credit.loadReceivables(page.page + 1)"
+        >
+          Próxima
+        </button>
+      </nav>
+    }
+  </section>
+  @if (session.user()?.roles?.includes('ADMIN')) {
+    <section class="panel" aria-labelledby="fx-title">
+      <h2 id="fx-title">Administração de câmbio</h2>
+      <p>
+        Sincronize a cotação do provedor para habilitar pagamentos USD. A validade é de até 24
+        horas.
+      </p>
+      <button type="button" (click)="syncFx()" [disabled]="fxBusy">
+        {{ fxBusy ? 'Sincronizando…' : 'Sincronizar cotação' }}
+      </button>
+      @if (fxMessage) {
+        <p role="status">{{ fxMessage }}</p>
+      }
+    </section>
+  }
+  <section class="panel" aria-labelledby="statement-title">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Histórico financeiro</p>
+        <h2 id="statement-title">Extrato de liquidações</h2>
+      </div>
+      <button type="button" class="secondary" (click)="statement.load()">Atualizar extrato</button>
+    </div>
+    <p>Datas em São Paulo, incluindo o dia final. Totais de todo o filtro, separados por moeda.</p>
+    <form
+      [formGroup]="statement.form"
+      (submit)="$event.preventDefault(); statement.load(0)"
+      class="filters"
+    >
+      <div class="field">
+        <label for="from">Data inicial</label><input id="from" type="date" formControlName="from" />
+      </div>
+      <div class="field">
+        <label for="through">Data final</label
+        ><input id="through" type="date" formControlName="through" />
+      </div>
+      <div class="field">
+        <label for="filter-assignor">Cedente</label
+        ><select id="filter-assignor" formControlName="assignorId">
+          <option value="">Todos os cedentes</option>
+          @for (assignor of credit.assignors(); track assignor.id) {
+            <option [value]="assignor.id">{{ assignor.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="field">
+        <label for="filter-currency">Moeda de pagamento</label
+        ><select id="filter-currency" formControlName="currency">
+          <option value="">Todas as moedas</option>
+          <option value="BRL">BRL</option>
+          <option value="USD">USD</option>
+        </select>
+      </div>
+    </form>
+    @if (statement.loading()) {
+      <p role="status">Carregando extrato…</p>
+    }
+    @if (statement.error()) {
+      <p role="alert" class="error">{{ statement.error() }}</p>
+      <button type="button" (click)="statement.load()">Tentar novamente</button>
+    }
+    @if (statement.result(); as page) {
+      <div class="totals" aria-label="Totais do filtro">
+        @for (total of page.totalsByCurrency; track total.currency) {
+          <div>
+            <span>Total {{ total.currency }} · {{ total.count }} liquidação(ões)</span
+            ><strong>{{ total.currency }} {{ money(total.paymentTotal) }}</strong>
+          </div>
+        }
+      </div>
+      @if (page.items.length === 0) {
+        <p role="status">Nenhuma liquidação nesta página para os filtros informados.</p>
+      } @else {
+        <div class="table-scroll">
+          <table>
+            <caption class="sr-only">
+              Liquidações no período informado
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Liquidação / recebível</th>
+                <th scope="col">Cedente</th>
+                <th scope="col">Data · São Paulo</th>
+                <th scope="col">Face BRL</th>
+                <th scope="col">VP BRL</th>
+                <th scope="col">Deságio BRL</th>
+                <th scope="col">Pagamento</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of page.items; track item.id) {
+                <tr>
+                  <td class="identifier">
+                    {{ item.id }}<br /><small>{{ item.receivableId }}</small>
+                  </td>
+                  <td>{{ item.assignorName }}</td>
+                  <td>{{ instant(item.settledAt) }}</td>
+                  <td class="numeric">{{ money(item.faceValue) }}</td>
+                  <td class="numeric">{{ money(item.presentValueBrl) }}</td>
+                  <td class="numeric">{{ money(item.discountBrl) }}</td>
+                  <td class="numeric">
+                    {{ item.paymentCurrency }} {{ money(item.paymentAmount) }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+      <nav class="pagination" aria-label="Páginas do extrato">
+        <button
+          type="button"
+          class="secondary"
+          [disabled]="page.page === 0"
+          (click)="statement.load(page.page - 1)"
+        >
+          Anterior</button
+        ><span>Página {{ page.page + 1 }} · {{ page.total }} liquidação(ões)</span
+        ><button
+          type="button"
+          class="secondary"
+          [disabled]="(page.page + 1) * page.size >= page.total"
+          (click)="statement.load(page.page + 1)"
+        >
+          Próxima
+        </button>
+      </nav>
+    }
+  </section>
+</div>

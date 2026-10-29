@@ -1,3 +1,7 @@
+app:
+  admin:
+    username: ${ADMIN_USERNAME:admin}
+    password: ${ADMIN_PASSWORD}
 pricing:
   base-rate: ${PRICING_BASE_RATE:0.0100}
 fx:
@@ -29,7 +33,6 @@ spring:
     user:
       name: ${APP_USERNAME:operator}
       password: ${APP_PASSWORD}
-      roles: ${APP_ROLES:OPERATOR}
 server:
   port: ${SERVER_PORT:8080}
   servlet:

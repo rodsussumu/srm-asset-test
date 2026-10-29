@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/fx-rates")
 @Tag(name = "Câmbio")
-@SecurityRequirement(name = "basicAuth")
+@SecurityRequirement(name = "sessionAuth")
 public class FxRateController {
   private final FxRateService service;
   private final FxSynchronizationService synchronization;

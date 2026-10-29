@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/settlements")
 @Tag(name = "Liquidação")
-@SecurityRequirement(name = "basicAuth")
+@SecurityRequirement(name = "sessionAuth")
 public class SettlementController {
   private final SettlementService service;
   private final StatementService statements;

@@ -195,7 +195,9 @@ class SettlementIntegrationTest {
     admin.update("UPDATE assignors SET name = 'Future assignor name'");
     var retry = submit("operator", key, request).andExpect(status().isCreated()).andReturn();
     assertSameResponse(original, retry);
-    mvc.perform(get(original.getResponse().getHeader("Location")).with(user("operator")))
+    mvc.perform(
+            get(original.getResponse().getHeader("Location"))
+                .with(user("operator").roles("OPERATOR")))
         .andExpect(status().isOk())
         .andExpect(
             content()
@@ -330,19 +332,21 @@ class SettlementIntegrationTest {
     var request = body(UUID.randomUUID(), "BRL", "1", null);
     mvc.perform(
             post("/api/v1/settlements")
-                .with(user("operator"))
+                .with(user("operator").roles("OPERATOR"))
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request.toString()))
         .andExpect(status().isBadRequest());
     submit("operator", UUID.randomUUID().toString(), request).andExpect(status().isNotFound());
-    mvc.perform(get("/api/v1/settlements/" + UUID.randomUUID()).with(user("operator")))
+    mvc.perform(
+            get("/api/v1/settlements/" + UUID.randomUUID())
+                .with(user("operator").roles("OPERATOR")))
         .andExpect(status().isNotFound());
     mvc.perform(get("/api/v1/settlements/" + UUID.randomUUID()))
         .andExpect(status().isUnauthorized());
     mvc.perform(
             post("/api/v1/settlements")
-                .with(user("operator"))
+                .with(user("operator").roles("OPERATOR"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(request.toString()))
         .andExpect(status().isForbidden());
@@ -606,7 +610,7 @@ class SettlementIntegrationTest {
             () ->
                 dropped.perform(
                     post("/api/v1/settlements")
-                        .with(user("operator"))
+                        .with(user("operator").roles("OPERATOR"))
                         .with(csrf())
                         .header("Idempotency-Key", key)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -636,7 +640,7 @@ class SettlementIntegrationTest {
 
   @Test
   void openApiDescribesIdempotencyHeaderAndSnapshotResponse() throws Exception {
-    mvc.perform(get("/v3/api-docs").with(user("operator")))
+    mvc.perform(get("/v3/api-docs").with(user("operator").roles("OPERATOR")))
         .andExpect(status().isOk())
         .andExpect(
             jsonPath(
