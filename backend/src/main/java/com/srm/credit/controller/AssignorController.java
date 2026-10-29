@@ -5,6 +5,8 @@ import com.srm.credit.dto.CreateAssignorRequest;
 import com.srm.credit.dto.PageResponse;
 import com.srm.credit.service.AssignorService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,6 +15,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import java.net.URI;
 import java.util.UUID;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,7 +41,13 @@ public class AssignorController {
   @ApiResponse(
       responseCode = "201",
       description = "Cedente criado; Location aponta para o recurso.")
-  @ApiResponse(responseCode = "400", description = "Entrada inválida.")
+  @ApiResponse(
+      responseCode = "400",
+      description = "Entrada inválida.",
+      content =
+          @Content(
+              mediaType = "application/problem+json",
+              schema = @Schema(implementation = ProblemDetail.class)))
   public ResponseEntity<AssignorResponse> create(
       @Valid @RequestBody CreateAssignorRequest request) {
     var response = AssignorResponse.from(service.create(request.name()));
@@ -47,7 +56,13 @@ public class AssignorController {
 
   @GetMapping("/{id}")
   @Operation(summary = "Consultar cedente por identificador")
-  @ApiResponse(responseCode = "404", description = "Cedente não encontrado.")
+  @ApiResponse(
+      responseCode = "404",
+      description = "Cedente não encontrado.",
+      content =
+          @Content(
+              mediaType = "application/problem+json",
+              schema = @Schema(implementation = ProblemDetail.class)))
   public AssignorResponse find(@PathVariable UUID id) {
     return AssignorResponse.from(service.find(id));
   }

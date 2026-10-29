@@ -2,7 +2,7 @@
 
 ## Context
 
-O projeto possui estrutura inicial e o bloco 2: cadastro/consulta de cedentes e recebíveis em MVC, motor decimal e prazo, migration V1, erros e correlação. Por orientação do usuário, a task 2.6 antecipa testes/cobertura/artefatos backend na CI; a suíte Angular permanece associada ao painel. Câmbio, liquidação, extrato e frontend funcional ainda serão implementados. Motivação e contratos estão na proposta e nas seis specs. As premissas foram definidas no SPEC antes do código.
+O projeto possui estrutura inicial e blocos 2/3: cadastro/consulta MVC, motor decimal/prazo, migrations V1/V2, histórico e seleção temporal de câmbio, sincronização HTTP resiliente e simulação indicativa. A task 2.6 antecipa testes/cobertura/artefatos backend na CI, que agora inclui 126 testes; a suíte Angular permanece associada ao painel. Liquidação, extrato e frontend funcional ainda serão implementados. Motivação e contratos estão na proposta e nas seis specs. As premissas foram definidas no SPEC antes do código.
 
 ## Goals / Non-Goals
 

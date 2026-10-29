@@ -12,7 +12,7 @@ O motor em `model.PricingEngine` é independente de Spring, HTTP e banco. Recebe
 
 Executar no backend: `./mvnw -Dtest=PricingEngineTest test` com Java 21. Os testes também verificam empates de arredondamento, prazo zero no motor, limite de 36 meses, valores máximos, cotação inválida e ausência de fallback de strategy. A cotação em C3 é entrada explícita do teste; o motor não busca câmbio externo.
 
-O endpoint de simulação será implementado no bloco 3. A liquidação permanece fora do bloco 2.
+O endpoint `POST /api/v1/pricing/simulations` está implementado no bloco 3 e reproduz C1–C3 nos testes HTTP com Clock fixo. Recebe entradas sem título persistido e retorna valores/taxas como strings, os parâmetros de reprodução e `indicative: true`. Prazo e câmbio usam um único instante de referência. Em USD, a cotação vem do banco local; BRL não consulta câmbio. Não há gravação financeira ou chamada ao provedor durante a simulação. Contrato e exemplos em [API](api.md); liquidação permanece no bloco 4.
 
 ## Prazo e elegibilidade
 

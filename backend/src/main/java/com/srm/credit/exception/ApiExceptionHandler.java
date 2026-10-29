@@ -38,6 +38,30 @@ public class ApiExceptionHandler {
     return validation(Map.of(exception.field(), exception.getMessage()), request);
   }
 
+  @ExceptionHandler(FxRateConflictException.class)
+  ResponseEntity<ProblemDetail> fxConflict(HttpServletRequest request) {
+    return response(
+        HttpStatus.CONFLICT, "FX_RATE_EXISTS", "Já existe cotação para essa vigência.", request);
+  }
+
+  @ExceptionHandler(FxRateUnavailableException.class)
+  ResponseEntity<ProblemDetail> fxUnavailable(HttpServletRequest request) {
+    return response(
+        HttpStatus.SERVICE_UNAVAILABLE,
+        "FX_RATE_UNAVAILABLE",
+        "Cotação vigente indisponível ou expirada.",
+        request);
+  }
+
+  @ExceptionHandler(FxProviderUnavailableException.class)
+  ResponseEntity<ProblemDetail> providerUnavailable(HttpServletRequest request) {
+    return response(
+        HttpStatus.SERVICE_UNAVAILABLE,
+        "FX_PROVIDER_UNAVAILABLE",
+        "Não foi possível sincronizar a cotação.",
+        request);
+  }
+
   @ExceptionHandler(MethodArgumentNotValidException.class)
   ResponseEntity<ProblemDetail> invalidBody(
       MethodArgumentNotValidException exception, HttpServletRequest request) {

@@ -6,6 +6,8 @@ import com.srm.credit.dto.ReceivableResponse;
 import com.srm.credit.model.ReceivableStatus;
 import com.srm.credit.service.ReceivableService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -14,6 +16,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import java.net.URI;
 import java.util.UUID;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,7 +44,11 @@ public class ReceivableController {
       description = "Recebível criado no estado AVAILABLE e versão zero.")
   @ApiResponse(
       responseCode = "400",
-      description = "Entrada inválida, vencimento inelegível ou cedente inexistente.")
+      description = "Entrada inválida, vencimento inelegível ou cedente inexistente.",
+      content =
+          @Content(
+              mediaType = "application/problem+json",
+              schema = @Schema(implementation = ProblemDetail.class)))
   public ResponseEntity<ReceivableResponse> create(
       @Valid @RequestBody CreateReceivableRequest request) {
     var response =
@@ -58,7 +65,13 @@ public class ReceivableController {
 
   @GetMapping("/{id}")
   @Operation(summary = "Consultar recebível por identificador")
-  @ApiResponse(responseCode = "404", description = "Recebível não encontrado.")
+  @ApiResponse(
+      responseCode = "404",
+      description = "Recebível não encontrado.",
+      content =
+          @Content(
+              mediaType = "application/problem+json",
+              schema = @Schema(implementation = ProblemDetail.class)))
   public ReceivableResponse find(@PathVariable UUID id) {
     return ReceivableResponse.from(service.find(id));
   }

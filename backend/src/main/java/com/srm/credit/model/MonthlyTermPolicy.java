@@ -2,6 +2,7 @@ package com.srm.credit.model;
 
 import com.srm.credit.exception.InvalidInputException;
 import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
@@ -16,10 +17,14 @@ public final class MonthlyTermPolicy {
   }
 
   public Term evaluate(LocalDate dueDate) {
+    return evaluate(dueDate, clock.instant());
+  }
+
+  public Term evaluate(LocalDate dueDate, Instant reference) {
     if (dueDate == null) {
       throw new InvalidInputException("dueDate", "Vencimento obrigatório.");
     }
-    LocalDate operationDate = LocalDate.ofInstant(clock.instant(), BUSINESS_ZONE);
+    LocalDate operationDate = LocalDate.ofInstant(reference, BUSINESS_ZONE);
     long days = ChronoUnit.DAYS.between(operationDate, dueDate);
     if (days < 1 || days > 1080) {
       throw new InvalidInputException(

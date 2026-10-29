@@ -15,5 +15,12 @@ services:
       timeout: 3s
       retries: 10
 
+  fx-mock:
+    build: ./infra/fx-mock
+    environment:
+      FX_MOCK_RATE: ${FX_MOCK_RATE:-5.4321}
+    ports:
+      - '127.0.0.1:${FX_MOCK_PORT:-8090}:8090'
+
 volumes:
   postgres_data:
